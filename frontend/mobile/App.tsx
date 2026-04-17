@@ -44,7 +44,14 @@ export default function App() {
             <Stack.Navigator>
                 {userToken == null ? (
                     <>
-                        <Stack.Screen name="LoginScreen" component={LoginScreen} options={{ headerShown: false }} />
+                        <Stack.Screen name="LoginScreen" options={{ headerShown: false }}>
+                            {(props) => (
+                                <LoginScreen
+                                    {...props}
+                                    onLogin={(token) => setUserToken(token)}
+                                />
+                            )}
+                        </Stack.Screen>
                         <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
                     </>
                 ) : (
@@ -52,6 +59,7 @@ export default function App() {
                         {(props) => <MainScreen {...props} onLogout={() => setUserToken(null)} />}
                     </Stack.Screen>
                 )}
+
             </Stack.Navigator>
         </NavigationContainer>
     );

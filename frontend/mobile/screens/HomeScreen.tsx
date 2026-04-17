@@ -7,10 +7,6 @@ export default function HomeScreen({ navigation, onLogout }: any) {
     const handleLogout = async () => {
         // 1. Usuwamy token z pamięci telefonu
         await SecureStore.deleteItemAsync('userToken');
-
-        // 2. Zerujemy stan w App.tsx.
-        // To spowoduje, że App.tsx się przerysuje, zobaczy że userToken jest null
-        // i AUTOMATYCZNIE pokaże ekran Login.
         onLogout();
     };
 

@@ -32,6 +32,7 @@ model ParkingSpot {
 
   owner       User      @relation("UserSpots", fields: [ownerId], references: [id])
   bookings    Booking[]
+  surgeLogs   SurgePricingLog[]
 }
 
 model Booking {
@@ -43,6 +44,31 @@ model Booking {
   totalPrice Float
   status     String      @default("PENDING")
 
+  // -- Blockchain --
+    contractTxHash   String?     @unique
+    depositStatus    String?    //  LOCKED, REFUNDED, SLASHED
+
   spot       ParkingSpot @relation(fields: [spotId], references: [id])
   renter     User        @relation("UserBookings", fields: [renterId], references: [id])
+  blockchainEvents BlockchainEvent[]
+}
+
+model SurgePricingLog {
+  id          Int         @id @default(autoincrement())
+  spotId      Int
+  multiplier  Float
+  reason      String?
+  createdAt   DateTime    @default(now())
+
+  spot        ParkingSpot @relation(fields: [spotId], references: [id])
+}
+
+model BlockchainEvent {
+  id          Int         @id @default(autoincrement())
+  bookingId   Int
+  eventType   String      //  "FUNDS_LOCKED", "FUNDS_SLASHED", "FUNDS_REFUNDED"
+  txHash      String      @unique
+  createdAt   DateTime    @default(now())
+
+  booking     Booking     @relation(fields: [bookingId], references: [id])
 }

@@ -70,6 +70,16 @@ postgres-data/
 *.dump
 *.log
 
+# --- Prisma ---
+backend/src/generated/
+src/generated/
+generated/
+*.wasm
+migration_lock.toml
+
+*.db
+*.db-journal
+
 # --- Other ---
 .temp/
 .tmp/

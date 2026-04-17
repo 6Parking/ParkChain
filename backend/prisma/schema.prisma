@@ -4,12 +4,12 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -17,6 +17,7 @@ model User {
   email     String        @unique
   password  String
   username  String
+  walletAddress String?       @unique
   createdAt DateTime      @default(now())
 
   spots     ParkingSpot[] @relation("UserSpots")
@@ -31,6 +32,7 @@ model ParkingSpot {
   longitude   Float
   city        String
   address     String
+  hourlyRate  Float     // Bazowa stawka za godzinę
   hourlyRate  Float
   description String?
   hasCharger  Boolean   @default(false)
@@ -38,6 +40,7 @@ model ParkingSpot {
 
   owner       User      @relation("UserSpots", fields: [ownerId], references: [id])
   bookings    Booking[]
+  surgeLogs   SurgePricingLog[] // Historia wycen
 }
 
 model Booking {
@@ -49,6 +52,32 @@ model Booking {
   totalPrice Float
   status     String      @default("PENDING")
 
+  // -- Blockchain --
+    contractTxHash   String?     @unique // Hash transakcji kaucji/zapłaty na blockchainie
+    depositStatus    String?    // np. LOCKED, REFUNDED, SLASHED
+
   spot       ParkingSpot @relation(fields: [spotId], references: [id])
   renter     User        @relation("UserBookings", fields: [renterId], references: [id])
+  blockchainEvents BlockchainEvent[]
+}
+
+model SurgePricingLog {
+  id               Int         @id @default(autoincrement())
+  spotId           Int
+  surgeMultiplier  Float       // np. 1.5 (cena w górę o 50%)
+  reasonTags       Json        // np. ["Deszcz", "Koncert na stadionie"]
+  createdAt        DateTime    @default(now())
+
+  spot             ParkingSpot @relation(fields: [spotId], references: [id])
+}
+
+// Logi z Blockchaina: wyświetlanie kierowcy/właścicielowi historię co działo się z ich kaucją
+model BlockchainEvent {
+  id               Int         @id @default(autoincrement())
+  bookingId        Int
+  eventType        String      // np. DEPOSIT_LOCKED, PENALTY_CHARGED, PAYMENT_RELEASED
+  txHash           String      @unique
+  timestamp        DateTime    @default(now())
+
+  booking          Booking     @relation(fields: [bookingId], references: [id])
 }

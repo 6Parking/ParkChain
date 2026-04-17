@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { URL } from '../config';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, SafeAreaView, KeyboardAvoidingView, Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
-import { API_URL } from '../config';
+
+const LOCAL_API_URL = URL;
 
 export default function LoginScreen({ navigation, onLogin }: { navigation: any, onLogin?: (token: string) => void }) {
     const [email, setEmail] = useState('');
@@ -14,7 +16,8 @@ export default function LoginScreen({ navigation, onLogin }: { navigation: any, 
         }
 
         try {
-            const response = await fetch(`${API_URL}/login`, {
+            // Używamy naszego stałego adresu wbudowanego w ten plik
+            const response = await fetch(`${LOCAL_API_URL}/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
@@ -28,7 +31,6 @@ export default function LoginScreen({ navigation, onLogin }: { navigation: any, 
                     await SecureStore.setItemAsync('userName', data.user.username);
                 }
 
-                // Jeśli używamy mechanizmu onLogin z App.tsx, wywołujemy go:
                 if (onLogin) {
                     onLogin(data.token);
                 } else {
@@ -126,12 +128,10 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         padding: 25,
         borderRadius: 20,
-        // Cień dla iOS
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.1,
         shadowRadius: 10,
-        // Cień dla Android
         elevation: 5,
     },
     label: {

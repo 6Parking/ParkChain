@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { URL } from '../config';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, SafeAreaView, KeyboardAvoidingView, Platform } from 'react-native';
-import { API_URL } from '../config';
+
+const LOCAL_API_URL = URL;
 
 export default function RegisterScreen({ navigation }: any) {
     const [email, setEmail] = useState('');
@@ -30,7 +32,8 @@ export default function RegisterScreen({ navigation }: any) {
         }
 
         try {
-            const response = await fetch(`${API_URL}/register`, {
+            // Używamy naszego stałego adresu wbudowanego w ten plik
+            const response = await fetch(`${LOCAL_API_URL}/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, username, password }),

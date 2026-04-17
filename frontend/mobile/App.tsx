@@ -7,6 +7,8 @@ import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from './screens/LoginScreen';
 import MainScreen from './screens/HomeScreen';
 import RegisterScreen from './screens/RegisterScreen';
+import RentScreen from './screens/RentScreen';
+import RentOutScreen from './screens/RentOutScreen';
 import {ActivityIndicator, View} from "react-native";
 
 
@@ -16,7 +18,6 @@ export default function App() {
     const [isLoading, setIsLoading] = useState(true);
     const [userToken, setUserToken] = useState<string | null>(null);
     useEffect(() => {
-        // Funkcja sprawdzająca czy użytkownik jest już zalogowany
         const bootstrapAsync = async () => {
             let token: string | null = null;
             try {
@@ -55,9 +56,13 @@ export default function App() {
                         <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
                     </>
                 ) : (
+                    <>
                     <Stack.Screen name="MainScreen">
                         {(props) => <MainScreen {...props} onLogout={() => setUserToken(null)} />}
                     </Stack.Screen>
+                    <Stack.Screen name="Rent" component={RentScreen} options={{ title: 'Find Parking' }}></Stack.Screen>
+                    <Stack.Screen name="RentOut" component={RentOutScreen} options={{ title: 'My Spots' }}></Stack.Screen>
+                    </>
                 )}
 
             </Stack.Navigator>

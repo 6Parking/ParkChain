@@ -8,6 +8,7 @@ export default function RegisterScreen({ navigation }: any) {
     const [email, setEmail] = useState('');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
 
     const handleRegister = async () => {
         if (!email.trim() || !username.trim() || !password.trim()) {
@@ -30,6 +31,12 @@ export default function RegisterScreen({ navigation }: any) {
             Alert.alert('Validation Error', 'Password must be at least 6 characters long.');
             return;
         }
+
+        if (password !== confirmPassword) {
+            Alert.alert('Validation Error', 'Passwords do not match!');
+            return;
+        }
+
 
         try {
             // Używamy naszego stałego adresu wbudowanego w ten plik
@@ -95,6 +102,17 @@ export default function RegisterScreen({ navigation }: any) {
                         placeholderTextColor="#999"
                         value={password}
                         onChangeText={setPassword}
+                        secureTextEntry
+                        autoCapitalize="none"
+                    />
+
+                    <Text style={styles.label}>Confirm Password</Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Repeat your password"
+                        placeholderTextColor="#999"
+                        value={confirmPassword}
+                        onChangeText={setConfirmPassword}
                         secureTextEntry
                         autoCapitalize="none"
                     />

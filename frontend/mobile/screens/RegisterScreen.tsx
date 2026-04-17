@@ -8,8 +8,24 @@ export default function RegisterScreen({ navigation }: any) {
     const [password, setPassword] = useState('');
 
     const handleRegister = async () => {
-        if (!email || !username || !password) {
-            Alert.alert('Error', 'Please fill in all fields');
+        if (!email.trim() || !username.trim() || !password.trim()) {
+            Alert.alert('Validation Error', 'All fields are required.');
+            return;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            Alert.alert('Validation Error', 'Please enter a valid email address.');
+            return;
+        }
+
+        if (username.length < 3) {
+            Alert.alert('Validation Error', 'Username must be at least 3 characters long.');
+            return;
+        }
+
+        if (password.length < 6) {
+            Alert.alert('Validation Error', 'Password must be at least 6 characters long.');
             return;
         }
 

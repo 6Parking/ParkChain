@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
-import { API_URL } from '../config'; // Upewnij się, że ścieżka jest poprawna
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, SafeAreaView, KeyboardAvoidingView, Platform } from 'react-native';
+import { API_URL } from '../config';
 
 export default function RegisterScreen({ navigation }: any) {
     const [email, setEmail] = useState('');
@@ -9,12 +9,11 @@ export default function RegisterScreen({ navigation }: any) {
 
     const handleRegister = async () => {
         if (!email || !username || !password) {
-            Alert.alert('Błąd', 'Wypełnij wszystkie pola!');
+            Alert.alert('Error', 'Please fill in all fields');
             return;
         }
 
         try {
-            console.log("Rejestracja użytkownika:", username);
             const response = await fetch(`${API_URL}/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -24,61 +23,158 @@ export default function RegisterScreen({ navigation }: any) {
             const data = await response.json();
 
             if (response.status === 201) {
-                Alert.alert('Sukces', 'Konto utworzone! Teraz możesz się zalogować.');
-                navigation.navigate('Login');
+                Alert.alert('Success', 'Account created! You can now log in.', [
+                    { text: 'OK', onPress: () => navigation.navigate('LoginScreen') }
+                ]);
             } else {
-                Alert.alert('Błąd', data.error || 'Coś poszło nie tak');
+                Alert.alert('Registration Failed', data.error || 'Something went wrong');
             }
         } catch (error) {
             console.error(error);
-            Alert.alert('Błąd', 'Brak połączenia z serwerem');
+            Alert.alert('Connection Error', 'Could not reach the server');
         }
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Stwórz konto</Text>
+        <SafeAreaView style={styles.container}>
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={styles.content}
+            >
+                <View style={styles.header}>
+                    <Text style={styles.logo}>✨</Text>
+                    <Text style={styles.title}>Join ParkChain</Text>
+                    <Text style={styles.subtitle}>Create an account to start</Text>
+                </View>
 
-            <TextInput
-                style={styles.input}
-                placeholder="Nazwa użytkownika"
-                value={username}
-                onChangeText={setUsername}
-                autoCapitalize="none"
-            />
+                <View style={styles.form}>
+                    <Text style={styles.label}>Username</Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Choose a username"
+                        placeholderTextColor="#999"
+                        value={username}
+                        onChangeText={setUsername}
+                        autoCapitalize="none"
+                    />
 
-            <TextInput
-                style={styles.input}
-                placeholder="Email"
-                value={email}
-                onChangeText={setEmail}
-                autoCapitalize="none"
-            />
+                    <Text style={styles.label}>Email Address</Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="your@email.com"
+                        placeholderTextColor="#999"
+                        value={email}
+                        onChangeText={setEmail}
+                        autoCapitalize="none"
+                        keyboardType="email-address"
+                    />
 
-            <TextInput
-                style={styles.input}
-                placeholder="Hasło"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                autoCapitalize="none"
-            />
+                    <Text style={styles.label}>Password</Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Min. 6 characters"
+                        placeholderTextColor="#999"
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry
+                        autoCapitalize="none"
+                    />
 
-            <TouchableOpacity style={styles.button} onPress={handleRegister}>
-                <Text style={styles.buttonText}>Zarejestruj się</Text>
-            </TouchableOpacity>
+                    <TouchableOpacity style={styles.button} onPress={handleRegister} activeOpacity={0.8}>
+                        <Text style={styles.buttonText}>Create Account</Text>
+                    </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginTop: 20 }}>
-                <Text style={{ color: '#007AFF', textAlign: 'center' }}>Masz już konto? Zaloguj się</Text>
-            </TouchableOpacity>
-        </View>
+                    <View style={styles.footer}>
+                        <Text style={styles.footerText}>Already have an account? </Text>
+                        <TouchableOpacity onPress={() => navigation.goBack()}>
+                            <Text style={styles.linkText}>Sign In</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </KeyboardAvoidingView>
+        </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, justifyContent: 'center', padding: 20, backgroundColor: '#fff' },
-    title: { fontSize: 32, fontWeight: 'bold', marginBottom: 40, textAlign: 'center' },
-    input: { borderWidth: 1, borderColor: '#ddd', padding: 15, borderRadius: 8, marginBottom: 15 },
-    button: { backgroundColor: '#28a745', padding: 15, borderRadius: 8, alignItems: 'center' }, // Zielony dla rejestracji
-    buttonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 }
+    container: {
+        flex: 1,
+        backgroundColor: '#F8F9FA',
+    },
+    content: {
+        flex: 1,
+        justifyContent: 'center',
+        paddingHorizontal: 30,
+    },
+    header: {
+        alignItems: 'center',
+        marginBottom: 40,
+    },
+    logo: {
+        fontSize: 50,
+        marginBottom: 10,
+    },
+    title: {
+        fontSize: 28,
+        fontWeight: '800',
+        color: '#1A1A1A',
+        letterSpacing: -1,
+    },
+    subtitle: {
+        fontSize: 16,
+        color: '#666',
+        marginTop: 5,
+        textAlign: 'center',
+    },
+    form: {
+        backgroundColor: '#fff',
+        padding: 25,
+        borderRadius: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
+        elevation: 5,
+    },
+    label: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#444',
+        marginBottom: 8,
+        marginLeft: 4,
+    },
+    input: {
+        backgroundColor: '#F3F4F6',
+        padding: 16,
+        borderRadius: 12,
+        marginBottom: 15,
+        fontSize: 16,
+        color: '#1A1A1A',
+    },
+    button: {
+        backgroundColor: '#28a745',
+        padding: 18,
+        borderRadius: 12,
+        alignItems: 'center',
+        marginTop: 10,
+    },
+    buttonText: {
+        color: '#fff',
+        fontSize: 18,
+        fontWeight: '700',
+    },
+    footer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: 25,
+    },
+    footerText: {
+        color: '#666',
+        fontSize: 15,
+    },
+    linkText: {
+        color: '#007AFF',
+        fontSize: 15,
+        fontWeight: '700',
+    },
 });

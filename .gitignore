@@ -1,34 +1,77 @@
-# Gradle files
-.gradle/
+# --- System ---
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+Thumbs.db
+desktop.ini
+
+# --- Node.js / React Native / TypeScript ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+dist/
 build/
+out/
+lib/
+*.tsbuildinfo
+.eslintcache
+.stylelintcache
 
-# Local configuration file (sdk path, etc)
-local.properties
+# --- Environment ---
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env.bak
 
-# Log/OS Files
+# --- React Native ---
+.expo/
+.buckd/
+.watchmanconfig
+/ios/Pods/
+/ios/build/
+/ios/DerivedData/
+/ios/*.xcworkspace
+*.moved-aside
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+
+# --- Android (Android Studio / Gradle) ---
+.gradle/
+/android/app/build/
+/android/.gradle/
+/android/build/
+/android/captures/
+*.iml
+.externalNativeBuild
+/android/local.properties
+*.keystore
+!debug.keystore
+
+# --- WebStorm / JetBrains IDE ---
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+cmake-build-debug/
+
+# --- Backend / Database (Postgres) ---
+pgdata/
+postgres-data/
+*.sql
+*.dump
 *.log
 
-# Android Studio generated files and folders
-captures/
-.externalNativeBuild/
-.cxx/
-*.aab
-*.apk
-output-metadata.json
-
-# IntelliJ
-*.iml
-.idea/
-misc.xml
-deploymentTargetDropDown.xml
-render.experimental.xml
-
-# Keystore files
-*.jks
-*.keystore
-
-# Google Services (e.g. APIs or Firebase)
-google-services.json
-
-# Android Profiling
-*.hprof
+# --- Other ---
+.temp/
+.tmp/
+.cache/
+coverage/

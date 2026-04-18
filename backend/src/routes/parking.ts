@@ -136,4 +136,53 @@ router.get('/my-spots', async (req: Request, res: Response) => {
         res.status(401).json({ error: 'Invalid token' });
     }
 });
+
+router.post('/book', async (req: Request, res: Response) => {
+    try {
+        // 1. Sprawdzenie autoryzacji
+        const authHeader = req.headers.authorization;
+        if (!authHeader) return res.status(401).json({ error: 'Brak tokenu autoryzacji' });
+
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
+
+        // 2. Pobranie danych z frontendu
+        const { spotId, hours, totalPrice } = req.body;
+
+        if (!spotId || !hours || !totalPrice) {
+            return res.status(400).json({ error: 'Brakujące dane do rezerwacji' });
+        }
+
+        // 3. Obliczenie czasów (teraz -> za X godzin)
+        const startTime = new Date();
+        const endTime = new Date(startTime.getTime() + (hours * 60 * 60 * 1000)); // dodajemy milisekundy
+
+        // 4. TRANSAKCJA PRISMA - Robi obie operacje naraz!
+        const transactionResult = await prisma.$transaction([
+            // Akcja A: Stwórz nowe zamówienie w tabeli Booking
+            prisma.booking.create({
+                data: {
+                    spotId: parseInt(spotId),
+                    renterId: decoded.userId,
+                    startTime: startTime,
+                    endTime: endTime,
+                    totalPrice: parseFloat(totalPrice),
+                    status: 'PENDING'
+                }
+            }),
+            // Akcja B: Ustaw parking jako niedostępny (isActive: false)
+            prisma.parkingSpot.update({
+                where: { id: parseInt(spotId) },
+                data: { isActive: false }
+            })
+        ]);
+
+        // transactionResult[0] to nasze stworzone zamówienie
+        res.status(201).json({ message: 'Rezerwacja udana', booking: transactionResult[0] });
+
+    } catch (error) {
+        console.error("Błąd podczas rezerwacji:", error);
+        res.status(500).json({ error: 'Błąd serwera podczas przetwarzania rezerwacji' });
+    }
+});
 export default router;

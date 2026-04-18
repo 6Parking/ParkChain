@@ -54,4 +54,26 @@ router.post('/', async (req: Request, res: Response) => {
     }
 });
 
+router.get('/', async (req: Request, res: Response) => {
+    try {
+        const spots = await prisma.parkingSpot.findMany({
+            where: {
+                isActive: true // Pobieramy tylko aktywne ogłoszenia
+            },
+            include: {
+                owner: {
+                    select: {
+                        username: true // Możemy dołączyć nazwę właściciela, jeśli chcemy
+                    }
+                }
+            }
+        });
+
+        res.json(spots);
+    } catch (error) {
+        console.error("Błąd pobierania miejsc:", error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 export default router;

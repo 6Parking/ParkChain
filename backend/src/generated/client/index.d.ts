@@ -2511,6 +2511,8 @@ export namespace Prisma {
     latitude: number | null
     longitude: number | null
     city: string | null
+    street: string | null
+    houseNumber: string | null
     address: string | null
     hourlyRate: number | null
     description: string | null
@@ -2526,6 +2528,8 @@ export namespace Prisma {
     latitude: number | null
     longitude: number | null
     city: string | null
+    street: string | null
+    houseNumber: string | null
     address: string | null
     hourlyRate: number | null
     description: string | null
@@ -2541,6 +2545,8 @@ export namespace Prisma {
     latitude: number
     longitude: number
     city: number
+    street: number
+    houseNumber: number
     address: number
     hourlyRate: number
     description: number
@@ -2574,6 +2580,8 @@ export namespace Prisma {
     latitude?: true
     longitude?: true
     city?: true
+    street?: true
+    houseNumber?: true
     address?: true
     hourlyRate?: true
     description?: true
@@ -2589,6 +2597,8 @@ export namespace Prisma {
     latitude?: true
     longitude?: true
     city?: true
+    street?: true
+    houseNumber?: true
     address?: true
     hourlyRate?: true
     description?: true
@@ -2604,6 +2614,8 @@ export namespace Prisma {
     latitude?: true
     longitude?: true
     city?: true
+    street?: true
+    houseNumber?: true
     address?: true
     hourlyRate?: true
     description?: true
@@ -2706,6 +2718,8 @@ export namespace Prisma {
     latitude: number
     longitude: number
     city: string
+    street: string
+    houseNumber: string
     address: string
     hourlyRate: number
     description: string | null
@@ -2740,6 +2754,8 @@ export namespace Prisma {
     latitude?: boolean
     longitude?: boolean
     city?: boolean
+    street?: boolean
+    houseNumber?: boolean
     address?: boolean
     hourlyRate?: boolean
     description?: boolean
@@ -2759,6 +2775,8 @@ export namespace Prisma {
     latitude?: boolean
     longitude?: boolean
     city?: boolean
+    street?: boolean
+    houseNumber?: boolean
     address?: boolean
     hourlyRate?: boolean
     description?: boolean
@@ -2775,6 +2793,8 @@ export namespace Prisma {
     latitude?: boolean
     longitude?: boolean
     city?: boolean
+    street?: boolean
+    houseNumber?: boolean
     address?: boolean
     hourlyRate?: boolean
     description?: boolean
@@ -2791,6 +2811,8 @@ export namespace Prisma {
     latitude?: boolean
     longitude?: boolean
     city?: boolean
+    street?: boolean
+    houseNumber?: boolean
     address?: boolean
     hourlyRate?: boolean
     description?: boolean
@@ -2800,7 +2822,7 @@ export namespace Prisma {
     imageUrl?: boolean
   }
 
-  export type ParkingSpotOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "ownerId" | "latitude" | "longitude" | "city" | "address" | "hourlyRate" | "description" | "hasCharger" | "isActive" | "size" | "imageUrl", ExtArgs["result"]["parkingSpot"]>
+  export type ParkingSpotOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "ownerId" | "latitude" | "longitude" | "city" | "street" | "houseNumber" | "address" | "hourlyRate" | "description" | "hasCharger" | "isActive" | "size" | "imageUrl", ExtArgs["result"]["parkingSpot"]>
   export type ParkingSpotInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     owner?: boolean | UserDefaultArgs<ExtArgs>
     bookings?: boolean | ParkingSpot$bookingsArgs<ExtArgs>
@@ -2827,6 +2849,8 @@ export namespace Prisma {
       latitude: number
       longitude: number
       city: string
+      street: string
+      houseNumber: string
       address: string
       hourlyRate: number
       description: string | null
@@ -3265,6 +3289,8 @@ export namespace Prisma {
     readonly latitude: FieldRef<"ParkingSpot", 'Float'>
     readonly longitude: FieldRef<"ParkingSpot", 'Float'>
     readonly city: FieldRef<"ParkingSpot", 'String'>
+    readonly street: FieldRef<"ParkingSpot", 'String'>
+    readonly houseNumber: FieldRef<"ParkingSpot", 'String'>
     readonly address: FieldRef<"ParkingSpot", 'String'>
     readonly hourlyRate: FieldRef<"ParkingSpot", 'Float'>
     readonly description: FieldRef<"ParkingSpot", 'String'>
@@ -7175,6 +7201,8 @@ export namespace Prisma {
     latitude: 'latitude',
     longitude: 'longitude',
     city: 'city',
+    street: 'street',
+    houseNumber: 'houseNumber',
     address: 'address',
     hourlyRate: 'hourlyRate',
     description: 'description',
@@ -7388,6 +7416,8 @@ export namespace Prisma {
     latitude?: FloatFilter<"ParkingSpot"> | number
     longitude?: FloatFilter<"ParkingSpot"> | number
     city?: StringFilter<"ParkingSpot"> | string
+    street?: StringFilter<"ParkingSpot"> | string
+    houseNumber?: StringFilter<"ParkingSpot"> | string
     address?: StringFilter<"ParkingSpot"> | string
     hourlyRate?: FloatFilter<"ParkingSpot"> | number
     description?: StringNullableFilter<"ParkingSpot"> | string | null
@@ -7406,6 +7436,8 @@ export namespace Prisma {
     latitude?: SortOrder
     longitude?: SortOrder
     city?: SortOrder
+    street?: SortOrder
+    houseNumber?: SortOrder
     address?: SortOrder
     hourlyRate?: SortOrder
     description?: SortOrderInput | SortOrder
@@ -7427,6 +7459,8 @@ export namespace Prisma {
     latitude?: FloatFilter<"ParkingSpot"> | number
     longitude?: FloatFilter<"ParkingSpot"> | number
     city?: StringFilter<"ParkingSpot"> | string
+    street?: StringFilter<"ParkingSpot"> | string
+    houseNumber?: StringFilter<"ParkingSpot"> | string
     address?: StringFilter<"ParkingSpot"> | string
     hourlyRate?: FloatFilter<"ParkingSpot"> | number
     description?: StringNullableFilter<"ParkingSpot"> | string | null
@@ -7445,6 +7479,8 @@ export namespace Prisma {
     latitude?: SortOrder
     longitude?: SortOrder
     city?: SortOrder
+    street?: SortOrder
+    houseNumber?: SortOrder
     address?: SortOrder
     hourlyRate?: SortOrder
     description?: SortOrderInput | SortOrder
@@ -7468,6 +7504,8 @@ export namespace Prisma {
     latitude?: FloatWithAggregatesFilter<"ParkingSpot"> | number
     longitude?: FloatWithAggregatesFilter<"ParkingSpot"> | number
     city?: StringWithAggregatesFilter<"ParkingSpot"> | string
+    street?: StringWithAggregatesFilter<"ParkingSpot"> | string
+    houseNumber?: StringWithAggregatesFilter<"ParkingSpot"> | string
     address?: StringWithAggregatesFilter<"ParkingSpot"> | string
     hourlyRate?: FloatWithAggregatesFilter<"ParkingSpot"> | number
     description?: StringNullableWithAggregatesFilter<"ParkingSpot"> | string | null
@@ -7739,6 +7777,8 @@ export namespace Prisma {
     latitude: number
     longitude: number
     city: string
+    street?: string
+    houseNumber?: string
     address: string
     hourlyRate: number
     description?: string | null
@@ -7757,6 +7797,8 @@ export namespace Prisma {
     latitude: number
     longitude: number
     city: string
+    street?: string
+    houseNumber?: string
     address: string
     hourlyRate: number
     description?: string | null
@@ -7772,6 +7814,8 @@ export namespace Prisma {
     latitude?: FloatFieldUpdateOperationsInput | number
     longitude?: FloatFieldUpdateOperationsInput | number
     city?: StringFieldUpdateOperationsInput | string
+    street?: StringFieldUpdateOperationsInput | string
+    houseNumber?: StringFieldUpdateOperationsInput | string
     address?: StringFieldUpdateOperationsInput | string
     hourlyRate?: FloatFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -7790,6 +7834,8 @@ export namespace Prisma {
     latitude?: FloatFieldUpdateOperationsInput | number
     longitude?: FloatFieldUpdateOperationsInput | number
     city?: StringFieldUpdateOperationsInput | string
+    street?: StringFieldUpdateOperationsInput | string
+    houseNumber?: StringFieldUpdateOperationsInput | string
     address?: StringFieldUpdateOperationsInput | string
     hourlyRate?: FloatFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -7807,6 +7853,8 @@ export namespace Prisma {
     latitude: number
     longitude: number
     city: string
+    street?: string
+    houseNumber?: string
     address: string
     hourlyRate: number
     description?: string | null
@@ -7820,6 +7868,8 @@ export namespace Prisma {
     latitude?: FloatFieldUpdateOperationsInput | number
     longitude?: FloatFieldUpdateOperationsInput | number
     city?: StringFieldUpdateOperationsInput | string
+    street?: StringFieldUpdateOperationsInput | string
+    houseNumber?: StringFieldUpdateOperationsInput | string
     address?: StringFieldUpdateOperationsInput | string
     hourlyRate?: FloatFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -7835,6 +7885,8 @@ export namespace Prisma {
     latitude?: FloatFieldUpdateOperationsInput | number
     longitude?: FloatFieldUpdateOperationsInput | number
     city?: StringFieldUpdateOperationsInput | string
+    street?: StringFieldUpdateOperationsInput | string
+    houseNumber?: StringFieldUpdateOperationsInput | string
     address?: StringFieldUpdateOperationsInput | string
     hourlyRate?: FloatFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -8225,6 +8277,8 @@ export namespace Prisma {
     latitude?: SortOrder
     longitude?: SortOrder
     city?: SortOrder
+    street?: SortOrder
+    houseNumber?: SortOrder
     address?: SortOrder
     hourlyRate?: SortOrder
     description?: SortOrder
@@ -8248,6 +8302,8 @@ export namespace Prisma {
     latitude?: SortOrder
     longitude?: SortOrder
     city?: SortOrder
+    street?: SortOrder
+    houseNumber?: SortOrder
     address?: SortOrder
     hourlyRate?: SortOrder
     description?: SortOrder
@@ -8263,6 +8319,8 @@ export namespace Prisma {
     latitude?: SortOrder
     longitude?: SortOrder
     city?: SortOrder
+    street?: SortOrder
+    houseNumber?: SortOrder
     address?: SortOrder
     hourlyRate?: SortOrder
     description?: SortOrder
@@ -8943,6 +9001,8 @@ export namespace Prisma {
     latitude: number
     longitude: number
     city: string
+    street?: string
+    houseNumber?: string
     address: string
     hourlyRate: number
     description?: string | null
@@ -8959,6 +9019,8 @@ export namespace Prisma {
     latitude: number
     longitude: number
     city: string
+    street?: string
+    houseNumber?: string
     address: string
     hourlyRate: number
     description?: string | null
@@ -9038,6 +9100,8 @@ export namespace Prisma {
     latitude?: FloatFilter<"ParkingSpot"> | number
     longitude?: FloatFilter<"ParkingSpot"> | number
     city?: StringFilter<"ParkingSpot"> | string
+    street?: StringFilter<"ParkingSpot"> | string
+    houseNumber?: StringFilter<"ParkingSpot"> | string
     address?: StringFilter<"ParkingSpot"> | string
     hourlyRate?: FloatFilter<"ParkingSpot"> | number
     description?: StringNullableFilter<"ParkingSpot"> | string | null
@@ -9231,6 +9295,8 @@ export namespace Prisma {
     latitude: number
     longitude: number
     city: string
+    street?: string
+    houseNumber?: string
     address: string
     hourlyRate: number
     description?: string | null
@@ -9248,6 +9314,8 @@ export namespace Prisma {
     latitude: number
     longitude: number
     city: string
+    street?: string
+    houseNumber?: string
     address: string
     hourlyRate: number
     description?: string | null
@@ -9323,6 +9391,8 @@ export namespace Prisma {
     latitude?: FloatFieldUpdateOperationsInput | number
     longitude?: FloatFieldUpdateOperationsInput | number
     city?: StringFieldUpdateOperationsInput | string
+    street?: StringFieldUpdateOperationsInput | string
+    houseNumber?: StringFieldUpdateOperationsInput | string
     address?: StringFieldUpdateOperationsInput | string
     hourlyRate?: FloatFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9340,6 +9410,8 @@ export namespace Prisma {
     latitude?: FloatFieldUpdateOperationsInput | number
     longitude?: FloatFieldUpdateOperationsInput | number
     city?: StringFieldUpdateOperationsInput | string
+    street?: StringFieldUpdateOperationsInput | string
+    houseNumber?: StringFieldUpdateOperationsInput | string
     address?: StringFieldUpdateOperationsInput | string
     hourlyRate?: FloatFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9409,6 +9481,8 @@ export namespace Prisma {
     latitude: number
     longitude: number
     city: string
+    street?: string
+    houseNumber?: string
     address: string
     hourlyRate: number
     description?: string | null
@@ -9426,6 +9500,8 @@ export namespace Prisma {
     latitude: number
     longitude: number
     city: string
+    street?: string
+    houseNumber?: string
     address: string
     hourlyRate: number
     description?: string | null
@@ -9456,6 +9532,8 @@ export namespace Prisma {
     latitude?: FloatFieldUpdateOperationsInput | number
     longitude?: FloatFieldUpdateOperationsInput | number
     city?: StringFieldUpdateOperationsInput | string
+    street?: StringFieldUpdateOperationsInput | string
+    houseNumber?: StringFieldUpdateOperationsInput | string
     address?: StringFieldUpdateOperationsInput | string
     hourlyRate?: FloatFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9473,6 +9551,8 @@ export namespace Prisma {
     latitude?: FloatFieldUpdateOperationsInput | number
     longitude?: FloatFieldUpdateOperationsInput | number
     city?: StringFieldUpdateOperationsInput | string
+    street?: StringFieldUpdateOperationsInput | string
+    houseNumber?: StringFieldUpdateOperationsInput | string
     address?: StringFieldUpdateOperationsInput | string
     hourlyRate?: FloatFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9550,6 +9630,8 @@ export namespace Prisma {
     latitude: number
     longitude: number
     city: string
+    street?: string
+    houseNumber?: string
     address: string
     hourlyRate: number
     description?: string | null
@@ -9574,6 +9656,8 @@ export namespace Prisma {
     latitude?: FloatFieldUpdateOperationsInput | number
     longitude?: FloatFieldUpdateOperationsInput | number
     city?: StringFieldUpdateOperationsInput | string
+    street?: StringFieldUpdateOperationsInput | string
+    houseNumber?: StringFieldUpdateOperationsInput | string
     address?: StringFieldUpdateOperationsInput | string
     hourlyRate?: FloatFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9590,6 +9674,8 @@ export namespace Prisma {
     latitude?: FloatFieldUpdateOperationsInput | number
     longitude?: FloatFieldUpdateOperationsInput | number
     city?: StringFieldUpdateOperationsInput | string
+    street?: StringFieldUpdateOperationsInput | string
+    houseNumber?: StringFieldUpdateOperationsInput | string
     address?: StringFieldUpdateOperationsInput | string
     hourlyRate?: FloatFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9606,6 +9692,8 @@ export namespace Prisma {
     latitude?: FloatFieldUpdateOperationsInput | number
     longitude?: FloatFieldUpdateOperationsInput | number
     city?: StringFieldUpdateOperationsInput | string
+    street?: StringFieldUpdateOperationsInput | string
+    houseNumber?: StringFieldUpdateOperationsInput | string
     address?: StringFieldUpdateOperationsInput | string
     hourlyRate?: FloatFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null

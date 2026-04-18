@@ -1,24 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-    StyleSheet,
-    Text,
-    View,
-    TextInput,
-    TouchableOpacity,
-    Alert,
-    ScrollView,
-    SafeAreaView,
-    KeyboardAvoidingView,
-    Platform,
-    Image,
+    StyleSheet, Text, View, TextInput, TouchableOpacity,
+    Alert, ScrollView, SafeAreaView, KeyboardAvoidingView,
+    Platform, Image,
 } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { URL } from '../config';
 import { SegmentedButtons } from 'react-native-paper';
 import * as ImagePicker from 'expo-image-picker';
 
-export default function RentOutScreen() {
-    // State for address components and new options
+export default function RentOutScreen({ route, navigation }: any) {
     const [city, setCity] = useState('');
     const [street, setStreet] = useState('');
     const [houseNumber, setHouseNumber] = useState('');
@@ -29,27 +20,47 @@ export default function RentOutScreen() {
     const [loading, setLoading] = useState(false);
     const [image, setImage] = useState<string | null>(null);
 
+    // Pobieramy spot z parametrów (jeśli edycja)
+    const spot = route.params?.spot;
+
+    useEffect(() => {
+        if (spot) {
+            setCity(spot.city || '');
+            // Jeśli adres jest złączony, a chcesz go edytować, wpisujemy go w ulicę:
+            setStreet(spot.street || '');
+            setHouseNumber(spot.houseNumber || ''); // Uzupełnij jeśli masz to w backendzie osobo
+            setPrice(spot.hourlyRate?.toString() || '');
+            setSize(spot.size || 'medium');
+            setEvcharger(spot.hasCharger ? 'yes' : 'no');
+            setDescription(spot.description || '');
+        } else {
+            // Czyścimy formularz jeśli wchodzimy w tryb "Dodaj"
+            setCity(''); setStreet(''); setHouseNumber(''); setPrice('');
+            setDescription(''); setSize('medium'); setEvcharger('no');
+        }
+    }, [spot]);
+
     const handlePublish = async () => {
-        // Basic validation
         if (!city.trim() || !street.trim() || !houseNumber.trim() || !price.trim()) {
             Alert.alert('Error', 'Please fill in the city, street, number, and price.');
             return;
         }
 
         setLoading(true);
-
         try {
             const token = await SecureStore.getItemAsync('userToken');
-
             if (!token) {
-                Alert.alert('Error', 'You must be logged in to add a spot.');
+                Alert.alert('Error', 'You must be logged in.');
                 setLoading(false);
                 return;
             }
 
-            // Sending data to backend
-            const response = await fetch(`${URL}/parking`, {
-                method: 'POST',
+            // Decydujemy czy to POST (nowy) czy PUT (edycja)
+            const method = spot ? 'PUT' : 'POST';
+            const endpoint = spot ? `${URL}/parking/${spot.id}` : `${URL}/parking`;
+
+            const response = await fetch(endpoint, {
+                method: method,
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
@@ -61,28 +72,18 @@ export default function RentOutScreen() {
                     hourlyRate: parseFloat(price.replace(',', '.')),
                     description: description.trim(),
                     size: size,
-                    evcharger: evcharger // Backend converts 'yes' to true
+                    hasCharger: evcharger === 'yes'
                 }),
             });
 
-            const data = await response.json();
-
             if (response.ok) {
-                Alert.alert('Success', 'Your spot has been added!');
-                // Reset form
-                setCity('');
-                setStreet('');
-                setHouseNumber('');
-                setPrice('');
-                setDescription('');
-                setSize('medium');
-                setEvcharger('no');
-                setImage(null);
+                Alert.alert('Success', spot ? 'Spot updated!' : 'Spot added!');
+                navigation.goBack(); // Wraca do listy
             } else {
-                Alert.alert('Error', data.error || 'Failed to add the spot.');
+                const data = await response.json();
+                Alert.alert('Error', data.error || 'Failed to save.');
             }
         } catch (error) {
-            console.error(error);
             Alert.alert('Connection Error', 'Server is unreachable.');
         } finally {
             setLoading(false);
@@ -94,7 +95,7 @@ export default function RentOutScreen() {
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
             aspect: [4, 3],
-            quality: 1,
+            quality: 0.5, // Kompresja dla bazy danych
         });
 
         if (!result.canceled) {
@@ -104,57 +105,31 @@ export default function RentOutScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={{ flex: 1 }}
-            >
+            <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
                 <ScrollView contentContainerStyle={styles.scrollContent}>
                     <View style={styles.header}>
-                        <Text style={styles.title}>List Your Spot</Text>
+                        <Text style={styles.title}>{spot ? 'Edit Your Spot' : 'List Your Spot'}</Text>
                         <Text style={styles.subtitle}>Provide details about your parking space</Text>
                     </View>
 
                     <View style={styles.form}>
-                        {/* LOCATION SECTION */}
                         <Text style={styles.label}>City</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="e.g. London"
-                            value={city}
-                            onChangeText={setCity}
-                        />
+                        <TextInput style={styles.input} placeholder="e.g. London" value={city} onChangeText={setCity} />
 
                         <View style={styles.row}>
                             <View style={{ flex: 0.7 }}>
                                 <Text style={styles.label}>Street</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="e.g. Baker St"
-                                    value={street}
-                                    onChangeText={setStreet}
-                                />
+                                <TextInput style={styles.input} placeholder="e.g. Baker St" value={street} onChangeText={setStreet} />
                             </View>
                             <View style={{ flex: 0.25 }}>
                                 <Text style={styles.label}>No.</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="221B"
-                                    value={houseNumber}
-                                    onChangeText={setHouseNumber}
-                                />
+                                <TextInput style={styles.input} placeholder="221B" value={houseNumber} onChangeText={setHouseNumber} />
                             </View>
                         </View>
 
                         <Text style={styles.label}>Price per hour ($)</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="e.g. 4.50"
-                            keyboardType="numeric"
-                            value={price}
-                            onChangeText={setPrice}
-                        />
+                        <TextInput style={styles.input} placeholder="e.g. 4.50" keyboardType="numeric" value={price} onChangeText={setPrice} />
 
-                        {/* NEW OPTIONS SECTION */}
                         <Text style={styles.label}>Spot Size</Text>
                         <SegmentedButtons
                             style={styles.segmentedButtons}
@@ -165,10 +140,10 @@ export default function RentOutScreen() {
                                 { value: 'medium', label: 'Medium' },
                                 { value: 'big', label: 'Big' },
                             ]}
-                            theme={{ colors: { secondaryContainer: '#E8F0FE' } }}
+                            theme={{ colors: { secondaryContainer: '#4c4d4c', onSecondaryContainer: 'white' } }}
                         />
 
-                        <Text style={styles.label}>EV Charger Available</Text>
+                        <Text style={styles.label}>EV Charger</Text>
                         <SegmentedButtons
                             style={styles.segmentedButtons}
                             value={evcharger}
@@ -177,20 +152,18 @@ export default function RentOutScreen() {
                                 { value: 'no', label: 'No' },
                                 { value: 'yes', label: 'Yes' },
                             ]}
-                            theme={{ colors: { secondaryContainer: '#E8F0FE' } }}
+                            theme={{ colors: { secondaryContainer: '#4c4d4c', onSecondaryContainer: 'white' } }}
                         />
 
                         <Text style={styles.label}>Additional Description</Text>
                         <TextInput
                             style={[styles.input, styles.textArea]}
-                            placeholder="Describe gate access, security, etc."
+                            placeholder="Describe gate access, etc."
                             multiline
-                            numberOfLines={4}
                             value={description}
                             onChangeText={setDescription}
                         />
 
-                        {/* PHOTO SECTION */}
                         <Text style={styles.label}>Photo</Text>
                         <TouchableOpacity style={styles.imagePlaceholder} onPress={pickImage}>
                             {image ? (
@@ -209,7 +182,7 @@ export default function RentOutScreen() {
                             disabled={loading}
                         >
                             <Text style={styles.submitText}>
-                                {loading ? 'Processing...' : 'Publish Listing'}
+                                {loading ? 'Processing...' : spot ? 'Update Listing' : 'Publish Listing'}
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -218,6 +191,8 @@ export default function RentOutScreen() {
         </SafeAreaView>
     );
 }
+
+// ... styles bez zmian
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#F8F9FA' },

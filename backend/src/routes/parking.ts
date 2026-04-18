@@ -36,7 +36,9 @@ router.post('/', async (req: Request, res: Response) => {
             data: {
                 ownerId: decoded.userId,
                 address: `${street} ${houseNumber}, ${city}`,
-                city,
+                city: city,
+                street: street,
+                houseNumber: houseNumber,
                 latitude: parseFloat(geoData[0].lat),
                 longitude: parseFloat(geoData[0].lon),
                 hourlyRate,

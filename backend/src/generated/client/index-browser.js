@@ -134,6 +134,8 @@ exports.Prisma.ParkingSpotScalarFieldEnum = {
   latitude: 'latitude',
   longitude: 'longitude',
   city: 'city',
+  street: 'street',
+  houseNumber: 'houseNumber',
   address: 'address',
   hourlyRate: 'hourlyRate',
   description: 'description',

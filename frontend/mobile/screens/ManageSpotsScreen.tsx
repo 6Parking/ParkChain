@@ -64,20 +64,25 @@ export default function ManageSpotsScreen({ navigation }: any) {
             <FlatList
                 data={mySpots}
                 keyExtractor={(item) => item.id.toString()}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchMySpots(); }} />}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchMySpots(); }} />
+                }
                 contentContainerStyle={{ padding: 20 }}
                 ListEmptyComponent={<Text style={styles.empty}>You haven't added any spots yet.</Text>}
                 renderItem={({ item }) => (
-                    <View style={styles.spotCard}>
-                        <View style={{ flex: 1 }}>
-                            <Text style={styles.address}>{item.address}</Text>
-                            <Text style={styles.city}>{item.city}</Text>
-                            <View style={styles.statusBadge}>
-                                <Text style={styles.statusText}>{item.isActive ? '● Active' : '● Hidden'}</Text>
+                    // DODANO TOUCHABLE OPACITY TUTAJ:
+                    <TouchableOpacity onPress={() => navigation.navigate('RentOut', { spot: item })}>
+                        <View style={styles.spotCard}>
+                            <View style={{ flex: 1 }}>
+                                <Text style={styles.address}>{item.address}</Text>
+                                <Text style={styles.city}>{item.city}</Text>
+                                <View style={styles.statusBadge}>
+                                    <Text style={styles.statusText}>{item.isActive ? '● Active' : '● Hidden'}</Text>
+                                </View>
                             </View>
+                            <Text style={styles.price}>${item.hourlyRate}/h</Text>
                         </View>
-                        <Text style={styles.price}>${item.hourlyRate}/h</Text>
-                    </View>
+                    </TouchableOpacity>
                 )}
             />
         </SafeAreaView>

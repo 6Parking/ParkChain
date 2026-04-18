@@ -12,7 +12,6 @@ export default function PriceMarker({ price, coordinate, onPress }: any) {
         const generate = async () => {
             try {
                 if (ref.current && !uri) {
-                    // Przechwytujemy widok i zamieniamy na obrazek
                     const image = await ref.current.capture();
                     if (isMounted) {
                         setUri(image);
@@ -23,14 +22,13 @@ export default function PriceMarker({ price, coordinate, onPress }: any) {
             }
         };
 
-        const t = setTimeout(generate, 200); // Czas na wyrenderowanie tekstu
+        const t = setTimeout(generate, 200); 
         return () => {
             isMounted = false;
             clearTimeout(t);
         };
     }, []);
 
-    // Jeśli obrazek nie jest gotowy, renderujemy "ukryty" ViewShot
     if (!uri) {
         return (
             <Marker coordinate={coordinate} opacity={0}>
@@ -47,12 +45,11 @@ export default function PriceMarker({ price, coordinate, onPress }: any) {
         );
     }
 
-    // Gdy obrazek jest gotowy, renderujemy marker jako czystą grafikę
     return (
         <Marker
             coordinate={coordinate}
             onPress={onPress}
-            image={{ uri: uri }} // TO NAPRAWIA UCINANIE
+            image={{ uri: uri }}
             tracksViewChanges={false}
         />
     );
@@ -61,7 +58,7 @@ export default function PriceMarker({ price, coordinate, onPress }: any) {
 const styles = StyleSheet.create({
     container: {
         backgroundColor: 'transparent',
-        padding: 5, // Margines bezpieczeństwa dla cieni
+        padding: 5, 
     },
     bubble: {
         backgroundColor: '#28A745',

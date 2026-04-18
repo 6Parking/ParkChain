@@ -2,9 +2,14 @@ import { Router, type Request, type Response } from 'express';
 import { prisma } from '../db';
 import jwt from 'jsonwebtoken';
 
-const router = Router();
-const JWT_SECRET = 'your_jwt_secret_key_123';
 
+const router = Router();
+const JWT_SECRET = process.env["JWT_SECRET"];
+
+if (!JWT_SECRET) {
+    throw new Error("No environmental variable JWT_SECRET");
+}
+    
 router.post('/', async (req: Request, res: Response) => {
     try {
         const authHeader = req.headers.authorization;
@@ -19,9 +24,7 @@ router.post('/', async (req: Request, res: Response) => {
             availabilityMode, availabilityData
         } = req.body;
 
-        // Używamy transakcji, aby mieć pewność, że wszystko zapisze się poprawnie
         const newSpot = await prisma.$transaction(async (tx) => {
-            // 1. Tworzymy miejsce parkingowe
             const spot = await tx.parkingSpot.create({
                 data: {
                     ownerId: decoded.userId,
@@ -39,7 +42,6 @@ router.post('/', async (req: Request, res: Response) => {
                 }
             });
 
-            // 2. Jeśli tryb jest inny niż 24/7, dodajemy reguły dostępności
             if (availabilityMode === 'RECURRING' && availabilityData.days) {
                 await tx.availability.createMany({
                     data: availabilityData.days.map((day: number) => ({
@@ -53,7 +55,6 @@ router.post('/', async (req: Request, res: Response) => {
                 await tx.availability.create({
                     data: {
                         spotId: spot.id,
-                        // Używamy new Date(), aby stworzyć pełny timestamp
                         startDateTime: new Date(availabilityData.start),
                         endDateTime: new Date(availabilityData.end)
                     }
@@ -86,7 +87,6 @@ router.put('/:id', async (req: Request, res: Response) => {
         } = req.body;
 
         const updatedSpot = await prisma.$transaction(async (tx) => {
-            // 1. Aktualizacja danych podstawowych
             const spot = await tx.parkingSpot.update({
                 where: { id: spotId },
                 data: {
@@ -97,10 +97,8 @@ router.put('/:id', async (req: Request, res: Response) => {
                 }
             });
 
-            // 2. Czyścimy stare reguły dostępności
             await tx.availability.deleteMany({ where: { spotId } });
 
-            // 3. Dodajemy nowe (analogicznie jak w POST)
             if (availabilityMode === 'RECURRING' && availabilityData.days) {
                 await tx.availability.createMany({
                     data: availabilityData.days.map((day: number) => ({
@@ -133,7 +131,7 @@ router.get('/', async (req: Request, res: Response) => {
         const spots = await prisma.parkingSpot.findMany({
             where: { isActive: true },
             include: {
-                availabilities: true, // Dołączamy reguły godzinowe
+                availabilities: true,
                 owner: { select: { username: true } }
             }
         });
@@ -168,27 +166,22 @@ router.get('/my-spots', async (req: Request, res: Response) => {
 
 router.post('/book', async (req: Request, res: Response) => {
     try {
-        // 1. Sprawdzenie autoryzacji
         const authHeader = req.headers.authorization;
-        if (!authHeader) return res.status(401).json({ error: 'Brak tokenu autoryzacji' });
+        if (!authHeader) return res.status(401).json({ error: 'No authorisation token' });
 
         const token = authHeader.split(' ')[1];
         const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
 
-        // 2. Pobranie danych z frontendu
         const { spotId, hours, totalPrice } = req.body;
 
         if (!spotId || !hours || !totalPrice) {
-            return res.status(400).json({ error: 'Brakujące dane do rezerwacji' });
+            return res.status(400).json({ error: 'Some reservation data is missing' });
         }
 
-        // 3. Obliczenie czasów (teraz -> za X godzin)
         const startTime = new Date();
-        const endTime = new Date(startTime.getTime() + (hours * 60 * 60 * 1000)); // dodajemy milisekundy
+        const endTime = new Date(startTime.getTime() + (hours * 60 * 60 * 1000));
 
-        // 4. TRANSAKCJA PRISMA - Robi obie operacje naraz!
         const transactionResult = await prisma.$transaction([
-            // Akcja A: Stwórz nowe zamówienie w tabeli Booking
             prisma.booking.create({
                 data: {
                     spotId: parseInt(spotId),
@@ -199,26 +192,23 @@ router.post('/book', async (req: Request, res: Response) => {
                     status: 'PENDING'
                 }
             }),
-            // Akcja B: Ustaw parking jako niedostępny (isActive: false)
             prisma.parkingSpot.update({
                 where: { id: parseInt(spotId) },
                 data: { isActive: false }
             })
         ]);
-
-        // transactionResult[0] to nasze stworzone zamówienie
-        res.status(201).json({ message: 'Rezerwacja udana', booking: transactionResult[0] });
+        res.status(201).json({ message: 'Reservation successful', booking: transactionResult[0] });
 
     } catch (error) {
-        console.error("Błąd podczas rezerwacji:", error);
-        res.status(500).json({ error: 'Błąd serwera podczas przetwarzania rezerwacji' });
+        console.error("Error during reservation:", error);
+        res.status(500).json({ error: 'Server error on processing reservation' });
     }
 });
 
 router.get('/my-rents', async (req: Request, res: Response) => {
     try {
         const authHeader = req.headers.authorization;
-        if (!authHeader) return res.status(401).json({ error: 'Brak tokenu autoryzacji' });
+        if (!authHeader) return res.status(401).json({ error: 'No authorisation token' });
 
         const token = authHeader.split(' ')[1];
         const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
@@ -238,7 +228,7 @@ router.get('/my-rents', async (req: Request, res: Response) => {
 
         res.json(bookings);
     } catch (error) {
-        console.error("Błąd pobierania wynajmów:", error);
+        console.error("Error during rents fetching:", error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -254,7 +244,7 @@ router.get('/:id', async (req: Request, res: Response) => {
         const spot = await prisma.parkingSpot.findUnique({
             where: { id: spotId },
             include: {
-                availabilities: true // KLUCZOWE: bez tego nie załadujesz godzin/dni
+                availabilities: true
             }
         });
 

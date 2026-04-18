@@ -17,7 +17,6 @@ export default function LoginScreen({ navigation, onLogin }: { navigation: any, 
         }
 
         try {
-            // Używamy naszego stałego adresu wbudowanego w ten plik
             const response = await fetch(`${LOCAL_API_URL}/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

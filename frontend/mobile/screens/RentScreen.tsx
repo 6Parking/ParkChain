@@ -12,9 +12,8 @@ import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { URL } from '../config'; // Imported from teammate's code
+import { URL } from '../config';
 
-// IMPORT TWOJEGO NOWEGO KOMPONENTU
 import PriceMarker from '../components/PriceMarker';
 
 export default function RentScreen({ navigation }: any) {
@@ -28,12 +27,11 @@ export default function RentScreen({ navigation }: any) {
         longitudeDelta: 0.05,
     });
 
-    // Data State (Teammate's)
     const [spots, setSpots] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
 
-    // Fetch data from real backend
+    // Fetch data from backend
     const fetchSpots = async () => {
         try {
             const response = await fetch(`${URL}/parking`);
@@ -170,7 +168,6 @@ export default function RentScreen({ navigation }: any) {
     );
 }
 
-// Style pozostają bez zmian (jak w Twoim oryginale)
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#F8F9FA' },
     center: { flex: 1, justifyContent: 'center', alignItems: 'center' },

@@ -28,7 +28,7 @@ export default function App() {
             try {
                 token = await SecureStore.getItemAsync('userToken');
             } catch (e) {
-                console.log('Błąd odczytu tokena');
+                console.log('Token reading error');
             }
             setUserToken(token);
             setIsLoading(false);

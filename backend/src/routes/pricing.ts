@@ -70,22 +70,19 @@ router.post('/suggestPrice', async (req: Request, res: Response) => {
 
         const result = await aiModel.generateContent(prompt);
         const textResponse = result.response.text();
-        console.log("🤖 Odpowiedź z Gemini:", textResponse); // <--- ZOBACZ CO ZWRACA AI
+        console.log("Gemini response:", textResponse);
 
-        // Używamy wyrażenia regularnego, żeby wyciągnąć same cyfry z tekstu
-        // (czasami AI pisze "**15.5**" albo "15.5 PLN" pomimo próśb)
         const match = textResponse.match(/[\d\.]+/);
         const suggestedPrice = match ? parseFloat(match[0]) : NaN;
 
         if (isNaN(suggestedPrice)) {
-            console.log("⚠️ Nie udało się wyciągnąć liczby. Włączam fallback.");
+            console.log("Could not take out the number. Turning on fallback.");
             return res.json({ price: getFallbackPrice(ctx) });
         }
         res.json({ price: suggestedPrice });
 
     } catch (error) {
-        // Tego Ci brakowało! Teraz zobaczysz DLACZEGO to nie działa.
-        console.error("🚨 Błąd połączenia z Gemini API:", error);
+        console.error("Error when connecting with Gemini API:", error);
         res.json({ price: getFallbackPrice(ctx) });
     }
 })

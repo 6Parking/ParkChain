@@ -3,42 +3,39 @@ import { StyleSheet, Text, View, TouchableOpacity, Alert, ActivityIndicator } fr
 import { Picker } from '@react-native-picker/picker';
 import * as SecureStore from 'expo-secure-store';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { URL } from '../config'; // Upewnij się, że masz ten import
+import { URL } from '../config';
 
 export default function RentSelectedSpot({ route, navigation }: any) {
     const spot = route?.params?.spot || {
         id: null,
-        address: 'Brak danych',
+        address: 'No data',
         price: '4.50',
         size: '-'
     };
 
     const [selectedHours, setSelectedHours] = useState(1);
-    const [isLoading, setIsLoading] = useState(false); // Stan ładowania dla przycisku
+    const [isLoading, setIsLoading] = useState(false);
 
     const basePrice = parseFloat(spot.price || 0);
     const totalPrice = (basePrice * selectedHours).toFixed(2);
     const timeOptions = Array.from({ length: 12 }, (_, i) => i + 1);
 
-    // Nowa funkcja obsługująca proces rezerwacji
     const handleRentConfirm = async () => {
         if (!spot.id) {
-            Alert.alert("Błąd", "Brak ID parkingu. Spróbuj ponownie wybrać miejsce z mapy.");
+            Alert.alert("Error", "No parking ID. Check once again spot on a map.");
             return;
         }
 
         setIsLoading(true);
 
         try {
-            // 1. Pobieramy token użytkownika
             const token = await SecureStore.getItemAsync('userToken');
             if (!token) {
-                Alert.alert('Błąd autoryzacji', 'Musisz być zalogowany, aby zarezerwować miejsce.');
+                Alert.alert('Authorisation error', 'You have to be logged in to rent a spot.');
                 setIsLoading(false);
                 return;
             }
 
-            // 2. Wysyłamy zapytanie do naszego nowego API
             const response = await fetch(`${URL}/parking/book`, {
                 method: 'POST',
                 headers: {
@@ -54,20 +51,18 @@ export default function RentSelectedSpot({ route, navigation }: any) {
 
             const data = await response.json();
 
-            // 3. Jeśli backend zwrócił sukces (kod 201)
             if (response.ok) {
-                // Przechodzimy do podsumowania, przekazując dane rezerwacji
                 navigation.navigate('RentResult', {
                     spot: spot,
                     totalPrice: totalPrice,
-                    bookingId: data.booking.id // Możesz to wykorzystać na ekranie wyniku!
+                    bookingId: data.booking.id
                 });
             } else {
-                Alert.alert('Błąd Rezerwacji', data.error || 'Nie udało się zarezerwować miejsca.');
+                Alert.alert('Reservation error', data.error || 'Could not rent the spot.');
             }
         } catch (error) {
-            console.error("Błąd fetch:", error);
-            Alert.alert('Błąd Połączenia', 'Nie można połączyć się z serwerem.');
+            console.error("Fetch error:", error);
+            Alert.alert('Connection error', 'Could not connect to the server.');
         } finally {
             setIsLoading(false);
         }
@@ -76,13 +71,11 @@ export default function RentSelectedSpot({ route, navigation }: any) {
     return (
         <SafeAreaView style={styles.safeArea} edges={['bottom', 'left', 'right']}>
             <View style={styles.container}>
-                {/* KAFELEK 1: Address */}
                 <View style={styles.card}>
                     <Text style={styles.label}>Address</Text>
                     <Text style={styles.valueText}>{spot.address}</Text>
                 </View>
 
-                {/* KAFELEK 2: Wheel Picker Czasu */}
                 <View style={[styles.card, styles.pickerCard]}>
                     <View style={styles.priceRow}>
                         <Text style={styles.label}>Rate</Text>
@@ -101,7 +94,7 @@ export default function RentSelectedSpot({ route, navigation }: any) {
                             {timeOptions.map(hour => (
                                 <Picker.Item
                                     key={hour}
-                                    label={`${hour} ${hour === 1 ? 'godzina' : 'godzin(y)'}`}
+                                    label={`${hour} ${hour === 1 ? 'hour' : 'hours'}`}
                                     value={hour}
                                 />
                             ))}
@@ -109,13 +102,11 @@ export default function RentSelectedSpot({ route, navigation }: any) {
                     </View>
                 </View>
 
-                {/* KAFELEK 3: Size */}
                 <View style={styles.card}>
                     <Text style={styles.label}>Size</Text>
                     <Text style={styles.valueText}>{spot.size}</Text>
                 </View>
 
-                {/* ZAKTUALIZOWANY PRZYCISK GŁÓWNY */}
                 <TouchableOpacity
                     style={[styles.rentButton, isLoading && { backgroundColor: '#66a3ff' }]}
                     onPress={handleRentConfirm}
@@ -132,7 +123,6 @@ export default function RentSelectedSpot({ route, navigation }: any) {
     );
 }
 
-// ... (style pozostają bez zmian, tak jak miałeś w swoim pliku) ...
 const styles = StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: '#F8F9FA' },
     container: { flex: 1, padding: 20 },

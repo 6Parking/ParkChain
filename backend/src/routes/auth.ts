@@ -4,7 +4,11 @@ import jwt from 'jsonwebtoken';
 import { prisma } from '../db';
 
 const router = Router();
-const JWT_SECRET = 'your_jwt_secret_key_123';
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+    throw new Error("No environmental variable JWT_SECRET");
+}
 
 router.post('/register', async (req: Request, res: Response) => {
     try {

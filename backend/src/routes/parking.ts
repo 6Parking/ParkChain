@@ -243,6 +243,32 @@ router.get('/my-rents', async (req: Request, res: Response) => {
     }
 });
 
+router.get('/:id', async (req: Request, res: Response) => {
+    try {
+        const spotId = parseInt(req.params.id as string);
+
+        if (isNaN(spotId)) {
+            return res.status(400).json({ error: 'Invalid spot ID' });
+        }
+
+        const spot = await prisma.parkingSpot.findUnique({
+            where: { id: spotId },
+            include: {
+                availabilities: true // KLUCZOWE: bez tego nie załadujesz godzin/dni
+            }
+        });
+
+        if (!spot) {
+            return res.status(404).json({ error: 'Spot not found' });
+        }
+
+        res.json(spot);
+    } catch (error) {
+        console.error("Error fetching single spot:", error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 router.delete('/:id', async (req: Request, res: Response) => {
     try {
         const authHeader = req.headers.authorization;

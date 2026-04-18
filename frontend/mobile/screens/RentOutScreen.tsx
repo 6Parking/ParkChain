@@ -5,6 +5,7 @@ import {
     Platform, Image, ActivityIndicator
 } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { URL } from '../config';
 import { SegmentedButtons } from 'react-native-paper';
 import * as ImagePicker from 'expo-image-picker';
@@ -26,62 +27,109 @@ export default function RentOutScreen({ route, navigation }: any) {
     const [availabilityMode, setAvailabilityMode] = useState('24_7');
     const [selectedDays, setSelectedDays] = useState<number[]>([]);
     const [specificDate, setSpecificDate] = useState('');
-    const [startTime, setStartTime] = useState('08:00');
-    const [endTime, setEndTime] = useState('16:00');
-    const [startOnce, setStartOnce] = useState('');
-    const [endOnce, setEndOnce] = useState('');
 
-    // Map State
+    const getMidnightDate = () => {
+        const d = new Date();
+        d.setHours(0, 0, 0, 0);
+        return d;
+    };
+
+    const [startTime, setStartTime] = useState(getMidnightDate());
+    const [endTime, setEndTime] = useState(getMidnightDate());
+    const [startOnce, setStartOnce] = useState(getMidnightDate());
+    const [endOnce, setEndOnce] = useState(getMidnightDate());
+    const [showPicker, setShowPicker] = useState<{show: boolean, field: string}>({show: false, field: ''});
+
     const [coordinate, setCoordinate] = useState({
-        latitude: 52.2297, // Default Warsaw
+        latitude: 52.2297,
         longitude: 21.0122,
     });
 
     const spot = route.params?.spot;
+    const getValidDate = (d: any) => {
+        if (d instanceof Date && !isNaN(d.getTime())) return d;
+        if (typeof d === 'string') {
+            const parsed = new Date(d);
+            return isNaN(parsed.getTime()) ? new Date() : parsed;
+        }
+        return new Date();
+    };
 
-    // Initialize data if editing an existing spot, or grab user's GPS if creating a new one
     useEffect(() => {
-        if (spot) {
-            setCity(spot.city || '');
-            setStreet(spot.street || '');
-            setHouseNumber(spot.houseNumber || '');
-            setPrice(spot.hourlyRate?.toString() || '');
-            setSize(spot.size || 'medium');
-            setEvcharger(spot.hasCharger ? 'yes' : 'no');
-            setDescription(spot.description || '');
-            if (spot.availabilityMode) setAvailabilityMode(spot.availabilityMode);
-            if (spot.availabilities && spot.availabilities.length > 0) {
-                if (spot.availabilityMode === 'RECURRING') {
-                    const days = spot.availabilities.map((a: any) => a.dayOfWeek);
-                    setSelectedDays(days);
-                }
-                if (spot.availabilityMode === 'ONCE' && spot.availabilities[0].specificDate) {
-                    const dateStr = spot.availabilities[0].specificDate.split('T')[0];
-                    setSpecificDate(dateStr);
-                }
-                setStartTime(spot.availabilities[0].startTime || '08:00');
-                setEndTime(spot.availabilities[0].endTime || '16:00');
-            }
-            if (spot.latitude && spot.longitude) {
-                setCoordinate({ latitude: spot.latitude, longitude: spot.longitude });
-            }
+        if (spot?.id) {
+            updateFields(spot);
+            fetchFreshSpotData(spot.id);
         } else {
             (async () => {
                 let { status } = await Location.requestForegroundPermissionsAsync();
                 if (status === 'granted') {
                     let loc = await Location.getCurrentPositionAsync({});
-                    setCoordinate({
-                        latitude: loc.coords.latitude,
-                        longitude: loc.coords.longitude
-                    });
-                    // Reverse geocode initial location
+                    setCoordinate({ latitude: loc.coords.latitude, longitude: loc.coords.longitude });
                     handleReverseGeocode(loc.coords.latitude, loc.coords.longitude);
                 }
             })();
         }
-    }, [spot]);
+    }, [spot?.id])
 
-    // Reverse Geocoding: translates GPS coordinates to real addresses
+
+    const fetchFreshSpotData = async (id: number) => {
+        try {
+            const token = await SecureStore.getItemAsync('userToken');
+            const response = await fetch(`${URL}/parking/${id}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
+
+            const contentType = response.headers.get("content-type");
+            if (response.ok && contentType && contentType.indexOf("application/json") !== -1) {
+                const freshData = await response.json();
+                updateFields(freshData);
+            } else {
+                const errorText = await response.text();
+                console.error("Server returned non-JSON response. Check endpoint URL.", errorText);
+            }
+        } catch (error) {
+            console.error("Error fetching fresh spot data:", error);
+        }
+    };
+
+
+    const updateFields = (data: any) => {
+        setCity(data.city || '');
+        setStreet(data.street || '');
+        setHouseNumber(data.houseNumber || '');
+        setPrice(data.hourlyRate?.toString() || '');
+        setSize(data.size || 'medium');
+        setEvcharger(data.hasCharger ? 'yes' : 'no');
+        setDescription(data.description || '');
+        if (data.availabilityMode) setAvailabilityMode(data.availabilityMode);
+
+        if (data.availabilities && data.availabilities.length > 0) {
+            if (data.availabilityMode === 'RECURRING') {
+                const days = data.availabilities.map((a: any) => a.dayOfWeek);
+                setSelectedDays(days);
+
+                const [sh, sm] = (data.availabilities[0].startTime || "00:00").split(':');
+                const startD = new Date();
+                startD.setHours(parseInt(sh), parseInt(sm), 0, 0);
+                setStartTime(startD);
+
+                const [eh, em] = (data.availabilities[0].endTime || "00:00").split(':');
+                const endD = new Date();
+                endD.setHours(parseInt(eh), parseInt(em), 0, 0);
+                setEndTime(endD);
+            }
+            if (data.availabilityMode === 'ONCE' && data.availabilities[0].startDateTime) {
+                setStartOnce(new Date(data.availabilities[0].startDateTime));
+                setEndOnce(new Date(data.availabilities[0].endDateTime));
+            }
+        }
+        if (data.latitude && data.longitude) {
+            setCoordinate({ latitude: data.latitude, longitude: data.longitude });
+        }
+    };
     const handleReverseGeocode = async (lat: number, lng: number) => {
         try {
             const addressArray = await Location.reverseGeocodeAsync({ latitude: lat, longitude: lng });
@@ -96,28 +144,28 @@ export default function RentOutScreen({ route, navigation }: any) {
         }
     };
 
-    // Update pin location and fetch address when user taps the map
+
     const handleMapPress = (e: any) => {
         const { latitude, longitude } = e.nativeEvent.coordinate;
         setCoordinate({ latitude, longitude });
         handleReverseGeocode(latitude, longitude);
     };
 
-    // ✨ OPTIMIZED AI FUNCTION: Now uses exact map coordinates instantly!
+
     const handleSuggestPrice = async () => {
         setSuggestingPrice(true);
         try {
-            // 2. Zapytanie do Twojego backendu AI
+
             const currentHour = new Date().getHours() + ":00";
             const response = await fetch(`${URL}/pricing/suggestPrice`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    lat: coordinate.latitude,   // We now use map coordinates directly!
+                    lat: coordinate.latitude,
                     lng: coordinate.longitude,
-                    standardPrice: 5.0, // egz. price
+                    standardPrice: 5.0,
                     hour: currentHour,
-                    weather: 'sunny', // statistic weather
+                    weather: 'sunny',
                     isEventNearby: false
 
                 }),
@@ -125,7 +173,7 @@ export default function RentOutScreen({ route, navigation }: any) {
 
             const data = await response.json();
             if (data.price) {
-                setPrice(data.price.toString()); // Wpisanie ceny do pola
+                setPrice(data.price.toString());
             } else {
                 Alert.alert('Error', 'AI could not generate a price.');
             }
@@ -137,7 +185,20 @@ export default function RentOutScreen({ route, navigation }: any) {
             setSuggestingPrice(false);
         }
     };
+    const handleConfirm = (date: Date) => {
+        const adjustedDate = new Date(date);
 
+        if (showPicker.field === 'startRec') setStartTime(adjustedDate);
+        else if (showPicker.field === 'endRec') setEndTime(adjustedDate);
+        else if (showPicker.field === 'startOnce') setStartOnce(adjustedDate);
+        else if (showPicker.field === 'endOnce') setEndOnce(adjustedDate);
+
+        setShowPicker({ show: false, field: '' });
+    };
+
+    const hidePicker = () => {
+        setShowPicker({ show: false, field: '' });
+    };
     const handlePublish = async () => {
         if (!city.trim() || !street.trim() || !houseNumber.trim() || !price.trim()) {
             Alert.alert('Error', 'Please fill in the city, street, number, and price.');
@@ -165,17 +226,17 @@ export default function RentOutScreen({ route, navigation }: any) {
                     description: description.trim(),
                     size: size,
                     hasCharger: evcharger === 'yes',
-                    // Sending exact map coordinates to the backend!
                     latitude: coordinate.latitude,
                     longitude: coordinate.longitude,
                     availabilityMode: availabilityMode,
                     availabilityData: availabilityMode === 'RECURRING'
-                        ? { days: selectedDays, start: startTime, end: endTime }
+                        ? {
+                            days: selectedDays,
+                            start: startTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false}),
+                            end: endTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false})
+                        }
                         : availabilityMode === 'ONCE'
-                            ? {
-                                start: startOnce,
-                                end: endOnce
-                            }
+                            ? { start: startOnce.toISOString(), end: endOnce.toISOString() }
                             : null
                 }),
             });
@@ -207,7 +268,29 @@ export default function RentOutScreen({ route, navigation }: any) {
             setImage(result.assets[0].uri);
         }
     };
+    const onDateChange = (event: any, selectedDate?: Date) => {
+        if (event.type === 'dismissed') {
+            setShowPicker({ show: false, field: '' });
+            return;
+        }
 
+        if (selectedDate) {
+            if (showPicker.field === 'startRec') setStartTime(selectedDate);
+            else if (showPicker.field === 'endRec') setEndTime(selectedDate);
+            else if (showPicker.field === 'startOnce') setStartOnce(selectedDate);
+            else if (showPicker.field === 'endOnce') setEndOnce(selectedDate);
+        }
+
+        if (Platform.OS === 'android') {
+            setTimeout(() => {
+                setShowPicker({ show: false, field: '' });
+            }, 100);
+        } else {
+            if (event.type === 'set' && !showPicker.field.includes('Once')) {
+                setShowPicker({ show: false, field: '' });
+            }
+        }
+    };
     return (
         <SafeAreaView style={styles.container} edges={['bottom', 'left', 'right']}>
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
@@ -217,7 +300,6 @@ export default function RentOutScreen({ route, navigation }: any) {
                         <Text style={styles.subtitle}>Provide details about your parking space</Text>
                     </View>
 
-                    {/* INTERACTIVE MAP FOR DROPPING PIN */}
                     <View style={styles.mapContainer}>
                         <MapView
                             style={styles.map}
@@ -258,7 +340,6 @@ export default function RentOutScreen({ route, navigation }: any) {
                             </View>
                         </View>
 
-                        {/* Prize section and AI button */}
                         <Text style={styles.label}>Price per hour (PLN)</Text>
                         <View style={styles.priceRowContainer}>
                             <TextInput
@@ -318,7 +399,7 @@ export default function RentOutScreen({ route, navigation }: any) {
                             theme={{ colors: { secondaryContainer: '#6C63FF', onSecondaryContainer: 'white' } }}
                         />
 
-                        {/* Tryb RECURRING: Wybór dni tygodnia */}
+
                         {availabilityMode === 'RECURRING' && (
                             <View style={styles.subForm}>
                                 <Text style={styles.subLabel}>Active Days</Text>
@@ -342,33 +423,55 @@ export default function RentOutScreen({ route, navigation }: any) {
                                 <View style={styles.row}>
                                     <View style={{ flex: 0.48 }}>
                                         <Text style={styles.subLabel}>From</Text>
-                                        <TextInput style={styles.input} placeholder="08:00" value={startTime} onChangeText={setStartTime} />
+                                        <TouchableOpacity
+                                            style={styles.timePickerButton}
+                                            onPress={() => setShowPicker({show: true, field: 'startRec'})}
+                                        >
+                                            <Text style={styles.timeText}>{startTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</Text>
+                                        </TouchableOpacity>
                                     </View>
                                     <View style={{ flex: 0.48 }}>
                                         <Text style={styles.subLabel}>To</Text>
-                                        <TextInput style={styles.input} placeholder="16:00" value={endTime} onChangeText={setEndTime} />
+                                        <TouchableOpacity
+                                            style={styles.timePickerButton}
+                                            onPress={() => setShowPicker({show: true, field: 'endRec'})}
+                                        >
+                                            <Text style={styles.timeText}>{endTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</Text>
+                                        </TouchableOpacity>
                                     </View>
                                 </View>
                             </View>
                         )}
 
-                        {/* Tryb ONCE: Wybór konkretnej daty */}
                         {availabilityMode === 'ONCE' && (
                             <View style={styles.subForm}>
-                                <Text style={styles.subLabel}>From (Date and Time)</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="YYYY-MM-DD HH:MM"
-                                    value={startOnce}
-                                    onChangeText={setStartOnce}
-                                />
-                                <Text style={styles.subLabel}>To (Date and Time)</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="YYYY-MM-DD HH:MM"
-                                    value={endOnce}
-                                    onChangeText={setEndOnce}
-                                />
+                                <Text style={styles.subLabel}>Start Date & Time</Text>
+                                <TouchableOpacity
+                                    style={styles.timePickerButton}
+                                    onPress={() => setShowPicker({show: true, field: 'startOnce'})}
+                                >
+                                    <Text style={styles.timeText}>
+                                        {startOnce.toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                                    </Text>
+                                </TouchableOpacity>
+
+                                <Text style={[styles.subLabel, {marginTop: 15}]}>End Date & Time</Text>
+                                <TouchableOpacity
+                                    style={styles.timePickerButton}
+                                    onPress={() => setShowPicker({show: true, field: 'endOnce'})}
+                                >
+                                    <Text style={styles.timeText}>
+                                        {endOnce.toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                                    </Text>
+                                </TouchableOpacity>
+                                {Platform.OS === 'ios' && showPicker.show && (
+                                    <TouchableOpacity
+                                        onPress={() => setShowPicker({show: false, field: ''})}
+                                        style={{ marginTop: 10, alignItems: 'center' }}
+                                    >
+                                        <Text style={{ color: '#6C63FF', fontWeight: 'bold' }}>Done</Text>
+                                    </TouchableOpacity>
+                                )}
                             </View>
                         )}
                         <Text style={styles.label}>Additional Description</Text>
@@ -380,7 +483,6 @@ export default function RentOutScreen({ route, navigation }: any) {
                             onChangeText={setDescription}
                         />
 
-                        {/* FAKE PHOTO UPLOAD FOR PITCHING / DEMO PURPOSES */}
                         <Text style={styles.label}>Photo (Demo UI)</Text>
                         <TouchableOpacity style={styles.imagePlaceholder} onPress={pickImage}>
                             {image ? (
@@ -392,7 +494,19 @@ export default function RentOutScreen({ route, navigation }: any) {
                                 </View>
                             )}
                         </TouchableOpacity>
-
+                        <DateTimePickerModal
+                            isVisible={showPicker.show}
+                            mode={showPicker.field.includes('Once') ? "datetime" : "time"}
+                            date={
+                                showPicker.field === 'startOnce' ? getValidDate(startOnce) :
+                                    showPicker.field === 'endOnce' ? getValidDate(endOnce) :
+                                        showPicker.field === 'startRec' ? getValidDate(startTime) : getValidDate(endTime)
+                            }
+                            onConfirm={handleConfirm}
+                            onCancel={hidePicker}
+                            is24Hour={true}
+                            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                        />
                         <TouchableOpacity
                             style={[styles.submitButton, loading && styles.disabledButton]}
                             onPress={handlePublish}
@@ -416,7 +530,6 @@ const styles = StyleSheet.create({
     title: { fontSize: 26, fontWeight: '800', color: '#1A1A1A' },
     subtitle: { fontSize: 15, color: '#666', marginTop: 5 },
 
-    // Map Styles
     mapContainer: {
         height: 200,
         borderRadius: 20,
@@ -473,21 +586,20 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#1A1A1A'
     },
-    // STYLE DLA RZĘDU Z CENĄ I PRZYCISKIEM AI:
     priceRowContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: 18,
     },
     aiButton: {
-        backgroundColor: '#6C63FF', // Ładny fioletowy kolor pod AI
+        backgroundColor: '#6C63FF',
         paddingVertical: 14,
         paddingHorizontal: 15,
         borderRadius: 10,
         marginLeft: 10,
         justifyContent: 'center',
         alignItems: 'center',
-        height: 52, // Dopasowanie wysokości do TextInput
+        height: 52,
     },
     aiButtonText: {
         color: '#fff',
@@ -544,4 +656,15 @@ const styles = StyleSheet.create({
     dayButtonActive: { backgroundColor: '#6C63FF', borderColor: '#6C63FF' },
     dayButtonText: { fontSize: 12, fontWeight: '700', color: '#444' },
     dayButtonTextActive: { color: '#fff' },
+    timePickerButton: {
+        backgroundColor: '#F3F4F6',
+        padding: 14,
+        borderRadius: 10,
+        alignItems: 'center',
+    },
+    timeText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#1A1A1A'
+    },
 });

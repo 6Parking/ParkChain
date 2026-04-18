@@ -119,7 +119,7 @@ export default function RentScreen({ navigation }: any) {
                     </View>
                     <View style={styles.priceTag}>
                         {/* Updated to teammate's database schema: hourlyRate */}
-                        <Text style={styles.price}>zl{item.hourlyRate}</Text>
+                        <Text style={styles.price}>{item.hourlyRate} PLN</Text>
                         <Text style={styles.perHour}>/h</Text>
                     </View>
                 </TouchableOpacity>
@@ -181,7 +181,9 @@ export default function RentScreen({ navigation }: any) {
                                 }}
                             >
                                 <View style={styles.markerContainer}>
-                                    <Text style={styles.markerText}>${spot.hourlyRate}</Text>
+                                    <Text style={styles.markerText} numberOfLines={1}>
+                                        {spot.hourlyRate} PLN
+                                    </Text>
                                 </View>
                             </Marker>
                         ))}
@@ -196,7 +198,7 @@ export default function RentScreen({ navigation }: any) {
                 <View style={styles.bottomSheet}>
                     <View style={styles.bottomSheetHeader}>
                         <Text style={styles.sheetAddress}>{selectedSpot.address}</Text>
-                        <Text style={styles.sheetPrice}>${selectedSpot.hourlyRate}/h</Text>
+                        <Text style={styles.sheetPrice}>{selectedSpot.hourlyRate} PLN/h</Text>
                     </View>
                     <Text style={styles.sheetCity}>{selectedSpot.city}</Text>
 
@@ -212,7 +214,10 @@ export default function RentScreen({ navigation }: any) {
 
             {/* Toggle Button */}
             <TouchableOpacity
-                style={styles.toggleButton}
+                style={[
+                    styles.toggleButton,
+                    selectedSpot && viewMode === 'map' ? { bottom: 200 } : {}
+                ]}
                 onPress={() => setViewMode(prev => prev === 'map' ? 'list' : 'map')}
             >
                 <Text style={styles.toggleButtonText}>
@@ -249,13 +254,18 @@ const styles = StyleSheet.create({
     map: { ...StyleSheet.absoluteFillObject },
     markerContainer: {
         backgroundColor: '#28A745',
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-        borderRadius: 15,
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 20,
         borderWidth: 2,
         borderColor: '#fff',
+        //minWidth: 50,
+        alignSelf: 'flex-start',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
-    markerText: { color: '#fff', fontWeight: 'bold' },
+    markerText: { color: '#fff', fontWeight: 'bold', textAlign: 'center', fontSize: 14, },
 
     // Combined List Styles
     spotCard: {

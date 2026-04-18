@@ -39,7 +39,6 @@ export default function RegisterScreen({ navigation }: any) {
 
 
         try {
-            // Używamy naszego stałego adresu wbudowanego w ten plik
             const response = await fetch(`${LOCAL_API_URL}/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

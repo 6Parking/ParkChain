@@ -2,7 +2,7 @@ POST http://localhost:3000/api/register
 Content-Type: application/json
 
 {
-  "email": "kedzbfgvvgfdxbior@test.pl",
+  "email": "kedzbdffdfgvvgfdxbior@test.pl",
   "password": "superhaslo123",
-  "username": "marbvvfgdbian"
+  "username": "marbfdvvfgdbian"
 }

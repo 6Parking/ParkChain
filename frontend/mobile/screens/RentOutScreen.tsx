@@ -492,7 +492,7 @@ const styles = StyleSheet.create({
     aiButtonText: {
         color: '#fff',
         fontWeight: '700',
-        fontSize: 13,
+        fontSize: 14,
     },
     textArea: { height: 80, textAlignVertical: 'top' },
     submitButton: {

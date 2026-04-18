@@ -56,33 +56,43 @@ export default function HomeScreen({ navigation, onLogout }: any) {
             <Text style={styles.welcome}>Welcome! What would you like to do today?</Text>
 
             <View style={styles.menuContainer}>
-              <TouchableOpacity style={[styles.card, styles.rentCard]} onPress={() => navigation.navigate("Rent")} activeOpacity={0.7}>
-                <Text style={styles.cardEmoji}>🔍</Text>
-                <Text style={styles.cardTitle}>Rent a Spot</Text>
-                <Text style={styles.cardSubtitle}>Find and book parking in seconds</Text>
-              </TouchableOpacity>
+                <TouchableOpacity style={[styles.card, styles.rentCard]} onPress={() => navigation.navigate("Rent")} activeOpacity={0.7}>
+                    <Text style={styles.cardEmoji}>🔍</Text>
+                    <Text style={styles.cardTitle}>Rent a Spot</Text>
+                    <Text style={styles.cardSubtitle}>Find and book parking in seconds</Text>
+                </TouchableOpacity>
 
-              <TouchableOpacity style={[styles.card, styles.manageRentsCard]} onPress={() => navigation.navigate("ManageRent")} activeOpacity={0.7}>
-                <Text style={styles.cardEmoji}>📋</Text>
-                <Text style={styles.cardTitle}>My Rents</Text>
-                <Text style={styles.cardSubtitle}>Manage your rents</Text>
-              </TouchableOpacity>
+                <TouchableOpacity style={[styles.card, styles.manageRentsCard]} onPress={() => navigation.navigate("ManageRent")} activeOpacity={0.7}>
+                    <Text style={styles.cardEmoji}>📋</Text>
+                    <Text style={styles.cardTitle}>My Rents</Text>
+                    <Text style={styles.cardSubtitle}>Manage your rents</Text>
+                </TouchableOpacity>
 
-              <TouchableOpacity style={[styles.card, styles.rentOutCard]} onPress={() => navigation.navigate("RentOut")} activeOpacity={0.7}>
-                <Text style={styles.cardEmoji}>💰</Text>
-                <Text style={styles.cardTitle}>Rent Out</Text>
-                <Text style={styles.cardSubtitle}>List your spot and start earning</Text>
-              </TouchableOpacity>
+                <TouchableOpacity style={[styles.card, styles.rentOutCard]} onPress={() => navigation.navigate("RentOut")} activeOpacity={0.7}>
+                    <Text style={styles.cardEmoji}>💰</Text>
+                    <Text style={styles.cardTitle}>Rent Out</Text>
+                    <Text style={styles.cardSubtitle}>List your spot and start earning</Text>
+                </TouchableOpacity>
 
-              <TouchableOpacity
-                style={[styles.card, styles.manageRentsOutCard]}
-                onPress={() => navigation.navigate("ManageRentOut")}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.cardEmoji}>📋</Text>
-                <Text style={styles.cardTitle}>My Listings</Text>
-                <Text style={styles.cardSubtitle}>Manage and edit your parking spots</Text>
-              </TouchableOpacity>
+                <TouchableOpacity
+                    style={[styles.card, styles.manageRentsOutCard]}
+                    onPress={() => navigation.navigate("ManageRentOut")}
+                    activeOpacity={0.7}
+                >
+                    <Text style={styles.cardEmoji}>📋</Text>
+                    <Text style={styles.cardTitle}>My Listings</Text>
+                    <Text style={styles.cardSubtitle}>Manage and edit your parking spots</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={[styles.card, styles.aboutCard]}
+                    onPress={() => navigation.navigate("About")}
+                    activeOpacity={0.7}
+                >
+                    <Text style={styles.cardEmoji}>📋</Text>
+                    <Text style={styles.cardTitle}>About</Text>
+                    <Text style={styles.cardSubtitle}>FAQ</Text>
+                </TouchableOpacity>
             </View>
           </View>
         </ScrollView>
@@ -92,40 +102,40 @@ export default function HomeScreen({ navigation, onLogout }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: {
+container: {
     flex: 1,
     backgroundColor: "#F8F9FA",
-  },
-  header: {
+},
+header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 25,
     paddingVertical: 15,
-  },
-  title: {
+},
+title: {
     fontSize: 24,
     fontWeight: "800",
     color: "#1A1A1A",
-  },
-  logoutText: {
+},
+logoutText: {
     color: "#FF3B30",
     fontWeight: "600",
-  },
-  content: {
+},
+content: {
     flex: 1,
     paddingHorizontal: 25,
     paddingTop: 20,
-  },
-  welcome: {
+},
+welcome: {
     fontSize: 18,
     color: "#666",
     marginBottom: 30,
-  },
-  menuContainer: {
+},
+menuContainer: {
     gap: 20,
-  },
-  card: {
+},
+card: {
     padding: 25,
     borderRadius: 20,
     backgroundColor: "#fff",
@@ -134,36 +144,40 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
-  },
-  rentCard: {
+},
+rentCard: {
     borderLeftWidth: 6,
     borderLeftColor: "#007AFF",
-  },
-  rentOutCard: {
+},
+rentOutCard: {
     borderLeftWidth: 6,
     borderLeftColor: "#a72892",
-  },
-  cardEmoji: {
+},
+cardEmoji: {
     fontSize: 32,
     marginBottom: 10,
-  },
-  cardTitle: {
+},
+cardTitle: {
     fontSize: 20,
     fontWeight: "700",
     color: "#1A1A1A",
-  },
-  manageRentsCard: {
+},
+manageRentsCard: {
     borderLeftWidth: 6,
     borderLeftColor: "#3ebd8f",
-  },
-  manageRentsOutCard: {
+},
+manageRentsOutCard: {
     borderLeftWidth: 6,
-    borderLeftColor: "#FF9500",
+    borderLeftColor: "#b90000",
+},
+aboutCard: {
+    borderLeftWidth: 6,
+    borderLeftColor: "#fff100",
     marginBottom: 30,
-  },
-  cardSubtitle: {
+},
+cardSubtitle: {
     fontSize: 14,
     color: "#666",
     marginTop: 4,
-  },
+},
 });

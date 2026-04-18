@@ -8,49 +8,65 @@ const JWT_SECRET = 'your_jwt_secret_key_123';
 router.post('/', async (req: Request, res: Response) => {
     try {
         const authHeader = req.headers.authorization;
-        if (!authHeader) {
-            return res.status(401).json({ error: 'No authorization token' });
-        }
+        if (!authHeader) return res.status(401).json({ error: 'No token' });
 
         const token = authHeader.split(' ')[1];
         const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
 
-        // 1. Odbieramy nowe pola z żądania
-        const { city, street, houseNumber, hourlyRate, description, size, evcharger } = req.body;
+        const {
+            city, street, houseNumber, hourlyRate, description,
+            size, hasCharger, latitude, longitude,
+            availabilityMode, availabilityData
+        } = req.body;
 
-        // 2. Geokodowanie (kod z poprzednich kroków zostaje)
-        const geoUrl = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1` +
-            `&street=${encodeURIComponent(houseNumber + ' ' + street)}` +
-            `&city=${encodeURIComponent(city)}` +
-            `&limit=1`;
+        // Używamy transakcji, aby mieć pewność, że wszystko zapisze się poprawnie
+        const newSpot = await prisma.$transaction(async (tx) => {
+            // 1. Tworzymy miejsce parkingowe
+            const spot = await tx.parkingSpot.create({
+                data: {
+                    ownerId: decoded.userId,
+                    address: `${street} ${houseNumber}, ${city}`,
+                    city,
+                    street,
+                    houseNumber,
+                    latitude,
+                    longitude,
+                    hourlyRate,
+                    description,
+                    size,
+                    hasCharger,
+                    availabilityMode,
+                }
+            });
 
-        const geoResponse = await fetch(geoUrl, { headers: { 'User-Agent': 'ParkChainApp/1.0' } });
-        const geoData = await geoResponse.json();
-
-        if (!geoData || geoData.length === 0) {
-            return res.status(400).json({ error: 'Address not found.' });
-        }
-
-        // 3. Zapisujemy z nowymi polami
-        const newSpot = await prisma.parkingSpot.create({
-            data: {
-                ownerId: decoded.userId,
-                address: `${street} ${houseNumber}, ${city}`,
-                city: city,
-                street: street,
-                houseNumber: houseNumber,
-                latitude: parseFloat(geoData[0].lat),
-                longitude: parseFloat(geoData[0].lon),
-                hourlyRate,
-                description,
-                size: size,
-                hasCharger: evcharger === 'yes', // Konwersja na true/false
+            // 2. Jeśli tryb jest inny niż 24/7, dodajemy reguły dostępności
+            if (availabilityMode === 'RECURRING' && availabilityData.days) {
+                await tx.availability.createMany({
+                    data: availabilityData.days.map((day: number) => ({
+                        spotId: spot.id,
+                        dayOfWeek: day,
+                        startTime: availabilityData.start,
+                        endTime: availabilityData.end
+                    }))
+                });
+            } else if (availabilityMode === 'ONCE' && availabilityData.start) {
+                await tx.availability.create({
+                    data: {
+                        spotId: spot.id,
+                        // Używamy new Date(), aby stworzyć pełny timestamp
+                        startDateTime: new Date(availabilityData.start),
+                        endDateTime: new Date(availabilityData.end)
+                    }
+                });
             }
+
+            return spot;
         });
 
         res.status(201).json(newSpot);
     } catch (error) {
-        res.status(500).json({ error: 'Internal server error' });
+        console.error(error);
+        res.status(500).json({ error: 'Failed to create spot' });
     }
 });
 
@@ -63,56 +79,66 @@ router.put('/:id', async (req: Request, res: Response) => {
         const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
         const spotId = parseInt(req.params.id as string);
 
-        const { city, street, houseNumber, hourlyRate, description, size, hasCharger } = req.body;
+        const {
+            city, street, houseNumber, hourlyRate, description,
+            size, hasCharger, latitude, longitude,
+            availabilityMode, availabilityData
+        } = req.body;
 
-        // Sprawdzamy, czy użytkownik jest właścicielem tego miejsca
-        const existingSpot = await prisma.parkingSpot.findUnique({
-            where: { id: spotId }
-        });
+        const updatedSpot = await prisma.$transaction(async (tx) => {
+            // 1. Aktualizacja danych podstawowych
+            const spot = await tx.parkingSpot.update({
+                where: { id: spotId },
+                data: {
+                    city, street, houseNumber,
+                    address: `${street} ${houseNumber}, ${city}`,
+                    hourlyRate, description, size, hasCharger,
+                    latitude, longitude, availabilityMode
+                }
+            });
 
-        if (!existingSpot || existingSpot.ownerId !== decoded.userId) {
-            return res.status(403).json({ error: 'Unauthorized to edit this spot' });
-        }
+            // 2. Czyścimy stare reguły dostępności
+            await tx.availability.deleteMany({ where: { spotId } });
 
-        const updatedSpot = await prisma.parkingSpot.update({
-            where: { id: spotId },
-            data: {
-                city,
-                street,
-                houseNumber,
-                address: `${street} ${houseNumber}, ${city}`,
-                hourlyRate,
-                description,
-                size,
-                hasCharger: hasCharger // React Native wysyła już boolean
+            // 3. Dodajemy nowe (analogicznie jak w POST)
+            if (availabilityMode === 'RECURRING' && availabilityData.days) {
+                await tx.availability.createMany({
+                    data: availabilityData.days.map((day: number) => ({
+                        spotId: spot.id,
+                        dayOfWeek: day,
+                        startTime: availabilityData.start,
+                        endTime: availabilityData.end
+                    }))
+                });
+            } else if (availabilityMode === 'ONCE' && availabilityData.start) {
+                await tx.availability.create({
+                    data: {
+                        spotId: spot.id,
+                        startDateTime: new Date(availabilityData.start),
+                        endDateTime: new Date(availabilityData.end)
+                    }
+                });
             }
+            return spot;
         });
 
         res.json(updatedSpot);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to update spot' });
+        res.status(500).json({ error: 'Update failed' });
     }
 });
 
 router.get('/', async (req: Request, res: Response) => {
     try {
         const spots = await prisma.parkingSpot.findMany({
-            where: {
-                isActive: true // Pobieramy tylko aktywne ogłoszenia
-            },
+            where: { isActive: true },
             include: {
-                owner: {
-                    select: {
-                        username: true // Możemy dołączyć nazwę właściciela, jeśli chcemy
-                    }
-                }
+                availabilities: true, // Dołączamy reguły godzinowe
+                owner: { select: { username: true } }
             }
         });
-
         res.json(spots);
     } catch (error) {
-        console.error("Błąd pobierania miejsc:", error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -128,6 +154,9 @@ router.get('/my-spots', async (req: Request, res: Response) => {
         const mySpots = await prisma.parkingSpot.findMany({
             where: {
                 ownerId: decoded.userId
+            },
+            include: {
+                availabilities: true
             }
         });
 

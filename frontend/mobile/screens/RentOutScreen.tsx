@@ -28,6 +28,8 @@ export default function RentOutScreen({ route, navigation }: any) {
     const [specificDate, setSpecificDate] = useState('');
     const [startTime, setStartTime] = useState('08:00');
     const [endTime, setEndTime] = useState('16:00');
+    const [startOnce, setStartOnce] = useState('');
+    const [endOnce, setEndOnce] = useState('');
 
     // Map State
     const [coordinate, setCoordinate] = useState({
@@ -170,7 +172,10 @@ export default function RentOutScreen({ route, navigation }: any) {
                     availabilityData: availabilityMode === 'RECURRING'
                         ? { days: selectedDays, start: startTime, end: endTime }
                         : availabilityMode === 'ONCE'
-                            ? { date: specificDate, start: startTime, end: endTime }
+                            ? {
+                                start: startOnce,
+                                end: endOnce
+                            }
                             : null
                 }),
             });
@@ -350,23 +355,20 @@ export default function RentOutScreen({ route, navigation }: any) {
                         {/* Tryb ONCE: Wybór konkretnej daty */}
                         {availabilityMode === 'ONCE' && (
                             <View style={styles.subForm}>
-                                <Text style={styles.subLabel}>Specific Date</Text>
+                                <Text style={styles.subLabel}>From (Date and Time)</Text>
                                 <TextInput
                                     style={styles.input}
-                                    placeholder="YYYY-MM-DD"
-                                    value={specificDate}
-                                    onChangeText={setSpecificDate}
+                                    placeholder="YYYY-MM-DD HH:MM"
+                                    value={startOnce}
+                                    onChangeText={setStartOnce}
                                 />
-                                <View style={styles.row}>
-                                    <View style={{ flex: 0.48 }}>
-                                        <Text style={styles.subLabel}>Start Time</Text>
-                                        <TextInput style={styles.input} placeholder="10:00" value={startTime} onChangeText={setStartTime} />
-                                    </View>
-                                    <View style={{ flex: 0.48 }}>
-                                        <Text style={styles.subLabel}>End Time</Text>
-                                        <TextInput style={styles.input} placeholder="18:00" value={endTime} onChangeText={setEndTime} />
-                                    </View>
-                                </View>
+                                <Text style={styles.subLabel}>To (Date and Time)</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="YYYY-MM-DD HH:MM"
+                                    value={endOnce}
+                                    onChangeText={setEndOnce}
+                                />
                             </View>
                         )}
                         <Text style={styles.label}>Additional Description</Text>

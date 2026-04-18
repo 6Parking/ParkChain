@@ -76,7 +76,7 @@ router.put("/:id", async (req: Request, res: Response) => {
     const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
     const spotId = parseInt(req.params.id as string);
 
-    const { city, street, houseNumber, hourlyRate, description, size, hasCharger, latitude, longitude, availabilityMode, availabilityData } =
+    const { city, street, houseNumber, hourlyRate, description, size, hasCharger, hasRoof, latitude, longitude, availabilityMode, availabilityData } =
       req.body;
 
     const updatedSpot = await prisma.$transaction(async (tx) => {
@@ -91,6 +91,7 @@ router.put("/:id", async (req: Request, res: Response) => {
           description,
           size,
           hasCharger,
+          hasRoof,
           latitude,
           longitude,
           availabilityMode,

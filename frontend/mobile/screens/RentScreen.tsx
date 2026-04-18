@@ -14,7 +14,8 @@ import * as Location from 'expo-location';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import { URL } from '../config'; // Imported from teammate's code
 
-export default function RentScreen() {
+// Added navigation prop to the component
+export default function RentScreen({ navigation }: any) {
     // UI State (Yours)
     const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
     const [selectedSpot, setSelectedSpot] = useState<any | null>(null);
@@ -73,6 +74,16 @@ export default function RentScreen() {
         fetchSpots();
     };
 
+    // Navigation function used by both list and map button
+    const handleBookSpot = (spot: any) => {
+        // Map backend schema (hourlyRate) to what RentSelectedSpot expects (price)
+        const formattedSpot = {
+            ...spot,
+            price: spot.hourlyRate.toString(), // RentSelectedSpot expects a string for basePrice parsing
+        };
+        navigation.navigate('RentSelectedSpot', { spot: formattedSpot });
+    };
+
     if (loading) {
         return (
             <View style={styles.center}>
@@ -93,7 +104,12 @@ export default function RentScreen() {
                 <Text style={styles.emptyText}>No parking spots available right now.</Text>
             }
             renderItem={({ item }) => (
-                <TouchableOpacity style={styles.spotCard} activeOpacity={0.7} onPress={() => setSelectedSpot(item)}>
+                <TouchableOpacity
+                    style={styles.spotCard}
+                    activeOpacity={0.7}
+                    // Changed onPress to navigate directly
+                    onPress={() => handleBookSpot(item)}
+                >
                     <View style={{ flex: 1 }}>
                         <Text style={styles.address}>{item.address}</Text>
                         <Text style={styles.city}>{item.city}</Text>
@@ -183,7 +199,12 @@ export default function RentScreen() {
                         <Text style={styles.sheetPrice}>${selectedSpot.hourlyRate}/h</Text>
                     </View>
                     <Text style={styles.sheetCity}>{selectedSpot.city}</Text>
-                    <TouchableOpacity style={styles.bookButton} onPress={() => alert('Booking logic comes here!')}>
+
+                    {/* Changed onPress to navigate with the selectedSpot */}
+                    <TouchableOpacity
+                        style={styles.bookButton}
+                        onPress={() => handleBookSpot(selectedSpot)}
+                    >
                         <Text style={styles.bookButtonText}>Book This Spot</Text>
                     </TouchableOpacity>
                 </View>

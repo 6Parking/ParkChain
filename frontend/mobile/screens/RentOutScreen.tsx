@@ -49,13 +49,7 @@ export default function RentOutScreen({ route, navigation }: any) {
         setLoading(true);
         try {
             const token = await SecureStore.getItemAsync('userToken');
-            if (!token) {
-                Alert.alert('Error', 'You must be logged in.');
-                setLoading(false);
-                return;
-            }
 
-            // Decydujemy czy to POST (nowy) czy PUT (edycja)
             const method = spot ? 'PUT' : 'POST';
             const endpoint = spot ? `${URL}/parking/${spot.id}` : `${URL}/parking`;
 
@@ -72,19 +66,20 @@ export default function RentOutScreen({ route, navigation }: any) {
                     hourlyRate: parseFloat(price.replace(',', '.')),
                     description: description.trim(),
                     size: size,
-                    hasCharger: evcharger === 'yes'
+                    hasCharger: evcharger === 'yes' // Backend oczekuje 'hasCharger' (boolean)
                 }),
             });
 
             if (response.ok) {
                 Alert.alert('Success', spot ? 'Spot updated!' : 'Spot added!');
-                navigation.goBack(); // Wraca do listy
+                navigation.goBack();
             } else {
                 const data = await response.json();
                 Alert.alert('Error', data.error || 'Failed to save.');
             }
         } catch (error) {
-            Alert.alert('Connection Error', 'Server is unreachable.');
+            console.error(error);
+            Alert.alert('Connection Error', 'Check if backend is running and URL is correct.');
         } finally {
             setLoading(false);
         }

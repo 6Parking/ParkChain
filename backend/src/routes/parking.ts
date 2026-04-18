@@ -54,6 +54,47 @@ router.post('/', async (req: Request, res: Response) => {
     }
 });
 
+router.put('/:id', async (req: Request, res: Response) => {
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader) return res.status(401).json({ error: 'No token' });
+
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
+        const spotId = parseInt(req.params.id as string);
+
+        const { city, street, houseNumber, hourlyRate, description, size, hasCharger } = req.body;
+
+        // Sprawdzamy, czy użytkownik jest właścicielem tego miejsca
+        const existingSpot = await prisma.parkingSpot.findUnique({
+            where: { id: spotId }
+        });
+
+        if (!existingSpot || existingSpot.ownerId !== decoded.userId) {
+            return res.status(403).json({ error: 'Unauthorized to edit this spot' });
+        }
+
+        const updatedSpot = await prisma.parkingSpot.update({
+            where: { id: spotId },
+            data: {
+                city,
+                street,
+                houseNumber,
+                address: `${street} ${houseNumber}, ${city}`,
+                hourlyRate,
+                description,
+                size,
+                hasCharger: hasCharger // React Native wysyła już boolean
+            }
+        });
+
+        res.json(updatedSpot);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to update spot' });
+    }
+});
+
 router.get('/', async (req: Request, res: Response) => {
     try {
         const spots = await prisma.parkingSpot.findMany({

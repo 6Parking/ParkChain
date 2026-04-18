@@ -5,19 +5,20 @@ import {
     View,
     FlatList,
     TouchableOpacity,
-    SafeAreaView,
     ActivityIndicator,
     RefreshControl
 } from 'react-native';
-import MapView, { PROVIDER_GOOGLE } from 'react-native-maps'; // Usunięto Marker, używamy własnego
+import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
-import { URL } from '../config';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { URL } from '../config'; // Imported from teammate's code
 
 // IMPORT TWOJEGO NOWEGO KOMPONENTU
 import PriceMarker from '../components/PriceMarker';
 
 export default function RentScreen({ navigation }: any) {
+    // UI State (Yours)
     const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
     const [selectedSpot, setSelectedSpot] = useState<any | null>(null);
     const [mapRegion, setMapRegion] = useState({
@@ -27,16 +28,21 @@ export default function RentScreen({ navigation }: any) {
         longitudeDelta: 0.05,
     });
 
+    // Data State (Teammate's)
     const [spots, setSpots] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
 
+    // Fetch data from real backend
     const fetchSpots = async () => {
         try {
             const response = await fetch(`${URL}/parking`);
             const data = await response.json();
+
             if (response.ok) {
                 setSpots(data);
+            } else {
+                console.error("Server Error:", data.error);
             }
         } catch (error) {
             console.error("Connection Error:", error);
@@ -46,6 +52,7 @@ export default function RentScreen({ navigation }: any) {
         }
     };
 
+    // Initialize location and fetch spots on mount
     useEffect(() => {
         (async () => {
             let { status } = await Location.requestForegroundPermissionsAsync();
@@ -59,7 +66,8 @@ export default function RentScreen({ navigation }: any) {
                 });
             }
         })();
-        fetchSpots();
+
+        fetchSpots(); 
     }, []);
 
     const handleBookSpot = (spot: any) => {
@@ -151,7 +159,7 @@ export default function RentScreen({ navigation }: any) {
             )}
 
             <TouchableOpacity
-                style={[styles.toggleButton, selectedSpot && viewMode === 'map' ? { bottom: 200 } : {}]}
+                style={[styles.toggleButton, selectedSpot && viewMode === 'map' ? { bottom: 225 } : {}]}
                 onPress={() => setViewMode(prev => prev === 'map' ? 'list' : 'map')}
             >
                 <Text style={styles.toggleButtonText}>
@@ -166,8 +174,25 @@ export default function RentScreen({ navigation }: any) {
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#F8F9FA' },
     center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    searchContainer: { position: 'absolute', top: 50, width: '100%', paddingHorizontal: 20, zIndex: 10 },
-    searchInput: { height: 50, borderRadius: 25, paddingHorizontal: 20, backgroundColor: '#fff', elevation: 5 },
+    searchContainer: {
+        position: 'absolute',
+        top: 40,
+        width: '90%',
+        paddingHorizontal: 20,
+        zIndex: 10,
+    },
+    searchInput: {
+        height: 50,
+        borderRadius: 25,
+        paddingHorizontal: 20,
+        fontSize: 16,
+        backgroundColor: '#fff',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 5,
+    },
     mapContainer: { flex: 1 },
     map: { ...StyleSheet.absoluteFillObject },
     spotCard: { backgroundColor: '#fff', padding: 20, borderRadius: 15, marginBottom: 15, flexDirection: 'row', justifyContent: 'space-between', elevation: 3 },
@@ -176,11 +201,11 @@ const styles = StyleSheet.create({
     priceTag: { alignItems: 'flex-end' },
     price: { fontSize: 18, fontWeight: '800', color: '#28A745' },
     perHour: { fontSize: 12, color: '#666' },
-    bottomSheet: { position: 'absolute', bottom: 30, left: 20, right: 20, backgroundColor: '#fff', borderRadius: 20, padding: 20, elevation: 10 },
+    bottomSheet: { position: 'absolute', bottom: 60, left: 20, right: 20, backgroundColor: '#fff', borderRadius: 20, padding: 20, elevation: 10 },
     sheetAddress: { fontSize: 18, fontWeight: '800' },
     sheetPrice: { fontSize: 22, fontWeight: '800', color: '#28A745' },
     bookButton: { backgroundColor: '#007AFF', padding: 15, borderRadius: 12, alignItems: 'center', marginTop: 10 },
     bookButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
-    toggleButton: { position: 'absolute', bottom: 40, alignSelf: 'center', backgroundColor: '#1A1A1A', paddingVertical: 12, paddingHorizontal: 25, borderRadius: 25, elevation: 5 },
+    toggleButton: { position: 'absolute', bottom: 60, alignSelf: 'center', backgroundColor: '#1A1A1A', paddingVertical: 12, paddingHorizontal: 25, borderRadius: 25, elevation: 5 },
     toggleButtonText: { color: '#fff', fontWeight: 'bold' },
 });

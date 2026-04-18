@@ -5,7 +5,7 @@ import { startCronJobs } from './routes/services/cron';
 
 import authRoutes from './routes/auth';
 import parkingRoutes from './routes/parking';
-import servicesRoutes from './routes/services/pricing'
+import pricingRoutes from './routes/pricing';
 
 const app = express();
 
@@ -15,7 +15,8 @@ app.use(express.json());
 
 app.use('/api', authRoutes);
 app.use('/api/parking', parkingRoutes);
-app.use('/api/services', servicesRoutes);
+app.use('/api/pricing', pricingRoutes);
+
 startCronJobs();
 
 const PORT = 3000;

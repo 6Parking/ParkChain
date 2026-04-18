@@ -138,7 +138,9 @@ exports.Prisma.ParkingSpotScalarFieldEnum = {
   hourlyRate: 'hourlyRate',
   description: 'description',
   hasCharger: 'hasCharger',
-  isActive: 'isActive'
+  isActive: 'isActive',
+  size: 'size',
+  imageUrl: 'imageUrl'
 };
 
 exports.Prisma.BookingScalarFieldEnum = {

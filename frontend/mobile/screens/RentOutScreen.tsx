@@ -18,7 +18,7 @@ import { SegmentedButtons } from 'react-native-paper';
 import * as ImagePicker from 'expo-image-picker';
 
 export default function RentOutScreen() {
-    // State for address components
+    // State for address components and new options
     const [city, setCity] = useState('');
     const [street, setStreet] = useState('');
     const [houseNumber, setHouseNumber] = useState('');
@@ -30,6 +30,7 @@ export default function RentOutScreen() {
     const [image, setImage] = useState<string | null>(null);
 
     const handlePublish = async () => {
+        // Basic validation
         if (!city.trim() || !street.trim() || !houseNumber.trim() || !price.trim()) {
             Alert.alert('Error', 'Please fill in the city, street, number, and price.');
             return;
@@ -46,7 +47,7 @@ export default function RentOutScreen() {
                 return;
             }
 
-            // Sending split address data to backend
+            // Sending data to backend
             const response = await fetch(`${URL}/parking`, {
                 method: 'POST',
                 headers: {
@@ -58,7 +59,9 @@ export default function RentOutScreen() {
                     street: street.trim(),
                     houseNumber: houseNumber.trim(),
                     hourlyRate: parseFloat(price.replace(',', '.')),
-                    description: description.trim()
+                    description: description.trim(),
+                    size: size,
+                    evcharger: evcharger // Backend converts 'yes' to true
                 }),
             });
 
@@ -66,11 +69,15 @@ export default function RentOutScreen() {
 
             if (response.ok) {
                 Alert.alert('Success', 'Your spot has been added!');
+                // Reset form
                 setCity('');
                 setStreet('');
                 setHouseNumber('');
                 setPrice('');
                 setDescription('');
+                setSize('medium');
+                setEvcharger('no');
+                setImage(null);
             } else {
                 Alert.alert('Error', data.error || 'Failed to add the spot.');
             }
@@ -104,11 +111,11 @@ export default function RentOutScreen() {
                 <ScrollView contentContainerStyle={styles.scrollContent}>
                     <View style={styles.header}>
                         <Text style={styles.title}>List Your Spot</Text>
-                        <Text style={styles.subtitle}>Provide a precise address to help with location</Text>
+                        <Text style={styles.subtitle}>Provide details about your parking space</Text>
                     </View>
 
                     <View style={styles.form}>
-                        {/* CITY FIELD */}
+                        {/* LOCATION SECTION */}
                         <Text style={styles.label}>City</Text>
                         <TextInput
                             style={styles.input}
@@ -117,7 +124,6 @@ export default function RentOutScreen() {
                             onChangeText={setCity}
                         />
 
-                        {/* STREET AND NUMBER ROW */}
                         <View style={styles.row}>
                             <View style={{ flex: 0.7 }}>
                                 <Text style={styles.label}>Street</Text>
@@ -148,9 +154,10 @@ export default function RentOutScreen() {
                             onChangeText={setPrice}
                         />
 
-                        <Text style={styles.label}>Size</Text>
+                        {/* NEW OPTIONS SECTION */}
+                        <Text style={styles.label}>Spot Size</Text>
                         <SegmentedButtons
-                            style={styles.SegmentedButtons}
+                            style={styles.segmentedButtons}
                             value={size}
                             onValueChange={setSize}
                             buttons={[
@@ -158,37 +165,41 @@ export default function RentOutScreen() {
                                 { value: 'medium', label: 'Medium' },
                                 { value: 'big', label: 'Big' },
                             ]}
-                            theme={{ colors: { secondaryContainer: '#4c4d4c' } }}
+                            theme={{ colors: { secondaryContainer: '#E8F0FE' } }}
                         />
 
-                        <Text style={styles.label}>EV charger</Text>
+                        <Text style={styles.label}>EV Charger Available</Text>
                         <SegmentedButtons
-                            style={styles.SegmentedButtons}
+                            style={styles.segmentedButtons}
                             value={evcharger}
                             onValueChange={setEvcharger}
                             buttons={[
                                 { value: 'no', label: 'No' },
                                 { value: 'yes', label: 'Yes' },
                             ]}
-                            theme={{ colors: { secondaryContainer: '#4c4d4c' } }}
+                            theme={{ colors: { secondaryContainer: '#E8F0FE' } }}
                         />
 
                         <Text style={styles.label}>Additional Description</Text>
                         <TextInput
                             style={[styles.input, styles.textArea]}
-                            placeholder="Describe how to find it, gate access, etc."
+                            placeholder="Describe gate access, security, etc."
                             multiline
                             numberOfLines={4}
                             value={description}
                             onChangeText={setDescription}
                         />
 
+                        {/* PHOTO SECTION */}
                         <Text style={styles.label}>Photo</Text>
                         <TouchableOpacity style={styles.imagePlaceholder} onPress={pickImage}>
                             {image ? (
                                 <Image source={{ uri: image }} style={styles.previewImage} />
                             ) : (
-                                <Text>Click to add photo</Text>
+                                <View style={styles.placeholderContainer}>
+                                    <Text style={styles.placeholderEmoji}>📷</Text>
+                                    <Text style={styles.placeholderText}>Click to add photo</Text>
+                                </View>
                             )}
                         </TouchableOpacity>
 
@@ -198,7 +209,7 @@ export default function RentOutScreen() {
                             disabled={loading}
                         >
                             <Text style={styles.submitText}>
-                                {loading ? 'Locating address...' : 'Publish Spot'}
+                                {loading ? 'Processing...' : 'Publish Listing'}
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -225,28 +236,29 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
     },
     row: { flexDirection: 'row', justifyContent: 'space-between' },
-    label: { fontSize: 13, fontWeight: '700', color: '#444', marginBottom: 6, marginLeft: 2 },
+    label: { fontSize: 13, fontWeight: '700', color: '#444', marginBottom: 8, marginLeft: 2 },
     input: {
         backgroundColor: '#F3F4F6',
         padding: 14,
         borderRadius: 10,
         marginBottom: 18,
-        fontSize: 16
+        fontSize: 16,
+        color: '#1A1A1A'
     },
     textArea: { height: 80, textAlignVertical: 'top' },
     submitButton: {
         backgroundColor: '#28A745',
-        padding: 16,
-        borderRadius: 10,
+        padding: 18,
+        borderRadius: 12,
         alignItems: 'center',
-        marginTop: 5
+        marginTop: 10
     },
     disabledButton: { backgroundColor: '#94d3a2' },
     submitText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
-    SegmentedButtons: { marginBottom: 20 },
+    segmentedButtons: { marginBottom: 20 },
     imagePlaceholder: {
         backgroundColor: '#F3F4F6',
-        height: 150,
+        height: 160,
         borderRadius: 12,
         justifyContent: 'center',
         alignItems: 'center',
@@ -256,5 +268,8 @@ const styles = StyleSheet.create({
         borderStyle: 'dashed',
         overflow: 'hidden'
     },
-    previewImage: { width: '100%', height: '100%', },
+    placeholderContainer: { alignItems: 'center' },
+    placeholderEmoji: { fontSize: 30, marginBottom: 5 },
+    placeholderText: { color: '#888', fontSize: 14 },
+    previewImage: { width: '100%', height: '100%' },
 });

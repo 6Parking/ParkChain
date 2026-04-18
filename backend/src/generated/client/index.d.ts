@@ -2516,6 +2516,8 @@ export namespace Prisma {
     description: string | null
     hasCharger: boolean | null
     isActive: boolean | null
+    size: string | null
+    imageUrl: string | null
   }
 
   export type ParkingSpotMaxAggregateOutputType = {
@@ -2529,6 +2531,8 @@ export namespace Prisma {
     description: string | null
     hasCharger: boolean | null
     isActive: boolean | null
+    size: string | null
+    imageUrl: string | null
   }
 
   export type ParkingSpotCountAggregateOutputType = {
@@ -2542,6 +2546,8 @@ export namespace Prisma {
     description: number
     hasCharger: number
     isActive: number
+    size: number
+    imageUrl: number
     _all: number
   }
 
@@ -2573,6 +2579,8 @@ export namespace Prisma {
     description?: true
     hasCharger?: true
     isActive?: true
+    size?: true
+    imageUrl?: true
   }
 
   export type ParkingSpotMaxAggregateInputType = {
@@ -2586,6 +2594,8 @@ export namespace Prisma {
     description?: true
     hasCharger?: true
     isActive?: true
+    size?: true
+    imageUrl?: true
   }
 
   export type ParkingSpotCountAggregateInputType = {
@@ -2599,6 +2609,8 @@ export namespace Prisma {
     description?: true
     hasCharger?: true
     isActive?: true
+    size?: true
+    imageUrl?: true
     _all?: true
   }
 
@@ -2699,6 +2711,8 @@ export namespace Prisma {
     description: string | null
     hasCharger: boolean
     isActive: boolean
+    size: string
+    imageUrl: string | null
     _count: ParkingSpotCountAggregateOutputType | null
     _avg: ParkingSpotAvgAggregateOutputType | null
     _sum: ParkingSpotSumAggregateOutputType | null
@@ -2731,6 +2745,8 @@ export namespace Prisma {
     description?: boolean
     hasCharger?: boolean
     isActive?: boolean
+    size?: boolean
+    imageUrl?: boolean
     owner?: boolean | UserDefaultArgs<ExtArgs>
     bookings?: boolean | ParkingSpot$bookingsArgs<ExtArgs>
     surgeLogs?: boolean | ParkingSpot$surgeLogsArgs<ExtArgs>
@@ -2748,6 +2764,8 @@ export namespace Prisma {
     description?: boolean
     hasCharger?: boolean
     isActive?: boolean
+    size?: boolean
+    imageUrl?: boolean
     owner?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["parkingSpot"]>
 
@@ -2762,6 +2780,8 @@ export namespace Prisma {
     description?: boolean
     hasCharger?: boolean
     isActive?: boolean
+    size?: boolean
+    imageUrl?: boolean
     owner?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["parkingSpot"]>
 
@@ -2776,9 +2796,11 @@ export namespace Prisma {
     description?: boolean
     hasCharger?: boolean
     isActive?: boolean
+    size?: boolean
+    imageUrl?: boolean
   }
 
-  export type ParkingSpotOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "ownerId" | "latitude" | "longitude" | "city" | "address" | "hourlyRate" | "description" | "hasCharger" | "isActive", ExtArgs["result"]["parkingSpot"]>
+  export type ParkingSpotOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "ownerId" | "latitude" | "longitude" | "city" | "address" | "hourlyRate" | "description" | "hasCharger" | "isActive" | "size" | "imageUrl", ExtArgs["result"]["parkingSpot"]>
   export type ParkingSpotInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     owner?: boolean | UserDefaultArgs<ExtArgs>
     bookings?: boolean | ParkingSpot$bookingsArgs<ExtArgs>
@@ -2810,6 +2832,8 @@ export namespace Prisma {
       description: string | null
       hasCharger: boolean
       isActive: boolean
+      size: string
+      imageUrl: string | null
     }, ExtArgs["result"]["parkingSpot"]>
     composites: {}
   }
@@ -3246,6 +3270,8 @@ export namespace Prisma {
     readonly description: FieldRef<"ParkingSpot", 'String'>
     readonly hasCharger: FieldRef<"ParkingSpot", 'Boolean'>
     readonly isActive: FieldRef<"ParkingSpot", 'Boolean'>
+    readonly size: FieldRef<"ParkingSpot", 'String'>
+    readonly imageUrl: FieldRef<"ParkingSpot", 'String'>
   }
     
 
@@ -7153,7 +7179,9 @@ export namespace Prisma {
     hourlyRate: 'hourlyRate',
     description: 'description',
     hasCharger: 'hasCharger',
-    isActive: 'isActive'
+    isActive: 'isActive',
+    size: 'size',
+    imageUrl: 'imageUrl'
   };
 
   export type ParkingSpotScalarFieldEnum = (typeof ParkingSpotScalarFieldEnum)[keyof typeof ParkingSpotScalarFieldEnum]
@@ -7365,6 +7393,8 @@ export namespace Prisma {
     description?: StringNullableFilter<"ParkingSpot"> | string | null
     hasCharger?: BoolFilter<"ParkingSpot"> | boolean
     isActive?: BoolFilter<"ParkingSpot"> | boolean
+    size?: StringFilter<"ParkingSpot"> | string
+    imageUrl?: StringNullableFilter<"ParkingSpot"> | string | null
     owner?: XOR<UserScalarRelationFilter, UserWhereInput>
     bookings?: BookingListRelationFilter
     surgeLogs?: SurgePricingLogListRelationFilter
@@ -7381,6 +7411,8 @@ export namespace Prisma {
     description?: SortOrderInput | SortOrder
     hasCharger?: SortOrder
     isActive?: SortOrder
+    size?: SortOrder
+    imageUrl?: SortOrderInput | SortOrder
     owner?: UserOrderByWithRelationInput
     bookings?: BookingOrderByRelationAggregateInput
     surgeLogs?: SurgePricingLogOrderByRelationAggregateInput
@@ -7400,6 +7432,8 @@ export namespace Prisma {
     description?: StringNullableFilter<"ParkingSpot"> | string | null
     hasCharger?: BoolFilter<"ParkingSpot"> | boolean
     isActive?: BoolFilter<"ParkingSpot"> | boolean
+    size?: StringFilter<"ParkingSpot"> | string
+    imageUrl?: StringNullableFilter<"ParkingSpot"> | string | null
     owner?: XOR<UserScalarRelationFilter, UserWhereInput>
     bookings?: BookingListRelationFilter
     surgeLogs?: SurgePricingLogListRelationFilter
@@ -7416,6 +7450,8 @@ export namespace Prisma {
     description?: SortOrderInput | SortOrder
     hasCharger?: SortOrder
     isActive?: SortOrder
+    size?: SortOrder
+    imageUrl?: SortOrderInput | SortOrder
     _count?: ParkingSpotCountOrderByAggregateInput
     _avg?: ParkingSpotAvgOrderByAggregateInput
     _max?: ParkingSpotMaxOrderByAggregateInput
@@ -7437,6 +7473,8 @@ export namespace Prisma {
     description?: StringNullableWithAggregatesFilter<"ParkingSpot"> | string | null
     hasCharger?: BoolWithAggregatesFilter<"ParkingSpot"> | boolean
     isActive?: BoolWithAggregatesFilter<"ParkingSpot"> | boolean
+    size?: StringWithAggregatesFilter<"ParkingSpot"> | string
+    imageUrl?: StringNullableWithAggregatesFilter<"ParkingSpot"> | string | null
   }
 
   export type BookingWhereInput = {
@@ -7706,6 +7744,8 @@ export namespace Prisma {
     description?: string | null
     hasCharger?: boolean
     isActive?: boolean
+    size?: string
+    imageUrl?: string | null
     owner: UserCreateNestedOneWithoutSpotsInput
     bookings?: BookingCreateNestedManyWithoutSpotInput
     surgeLogs?: SurgePricingLogCreateNestedManyWithoutSpotInput
@@ -7722,6 +7762,8 @@ export namespace Prisma {
     description?: string | null
     hasCharger?: boolean
     isActive?: boolean
+    size?: string
+    imageUrl?: string | null
     bookings?: BookingUncheckedCreateNestedManyWithoutSpotInput
     surgeLogs?: SurgePricingLogUncheckedCreateNestedManyWithoutSpotInput
   }
@@ -7735,6 +7777,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     hasCharger?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    size?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     owner?: UserUpdateOneRequiredWithoutSpotsNestedInput
     bookings?: BookingUpdateManyWithoutSpotNestedInput
     surgeLogs?: SurgePricingLogUpdateManyWithoutSpotNestedInput
@@ -7751,6 +7795,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     hasCharger?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    size?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     bookings?: BookingUncheckedUpdateManyWithoutSpotNestedInput
     surgeLogs?: SurgePricingLogUncheckedUpdateManyWithoutSpotNestedInput
   }
@@ -7766,6 +7812,8 @@ export namespace Prisma {
     description?: string | null
     hasCharger?: boolean
     isActive?: boolean
+    size?: string
+    imageUrl?: string | null
   }
 
   export type ParkingSpotUpdateManyMutationInput = {
@@ -7777,6 +7825,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     hasCharger?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    size?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ParkingSpotUncheckedUpdateManyInput = {
@@ -7790,6 +7840,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     hasCharger?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    size?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type BookingCreateInput = {
@@ -8178,6 +8230,8 @@ export namespace Prisma {
     description?: SortOrder
     hasCharger?: SortOrder
     isActive?: SortOrder
+    size?: SortOrder
+    imageUrl?: SortOrder
   }
 
   export type ParkingSpotAvgOrderByAggregateInput = {
@@ -8199,6 +8253,8 @@ export namespace Prisma {
     description?: SortOrder
     hasCharger?: SortOrder
     isActive?: SortOrder
+    size?: SortOrder
+    imageUrl?: SortOrder
   }
 
   export type ParkingSpotMinOrderByAggregateInput = {
@@ -8212,6 +8268,8 @@ export namespace Prisma {
     description?: SortOrder
     hasCharger?: SortOrder
     isActive?: SortOrder
+    size?: SortOrder
+    imageUrl?: SortOrder
   }
 
   export type ParkingSpotSumOrderByAggregateInput = {
@@ -8890,6 +8948,8 @@ export namespace Prisma {
     description?: string | null
     hasCharger?: boolean
     isActive?: boolean
+    size?: string
+    imageUrl?: string | null
     bookings?: BookingCreateNestedManyWithoutSpotInput
     surgeLogs?: SurgePricingLogCreateNestedManyWithoutSpotInput
   }
@@ -8904,6 +8964,8 @@ export namespace Prisma {
     description?: string | null
     hasCharger?: boolean
     isActive?: boolean
+    size?: string
+    imageUrl?: string | null
     bookings?: BookingUncheckedCreateNestedManyWithoutSpotInput
     surgeLogs?: SurgePricingLogUncheckedCreateNestedManyWithoutSpotInput
   }
@@ -8981,6 +9043,8 @@ export namespace Prisma {
     description?: StringNullableFilter<"ParkingSpot"> | string | null
     hasCharger?: BoolFilter<"ParkingSpot"> | boolean
     isActive?: BoolFilter<"ParkingSpot"> | boolean
+    size?: StringFilter<"ParkingSpot"> | string
+    imageUrl?: StringNullableFilter<"ParkingSpot"> | string | null
   }
 
   export type BookingUpsertWithWhereUniqueWithoutRenterInput = {
@@ -9172,6 +9236,8 @@ export namespace Prisma {
     description?: string | null
     hasCharger?: boolean
     isActive?: boolean
+    size?: string
+    imageUrl?: string | null
     owner: UserCreateNestedOneWithoutSpotsInput
     surgeLogs?: SurgePricingLogCreateNestedManyWithoutSpotInput
   }
@@ -9187,6 +9253,8 @@ export namespace Prisma {
     description?: string | null
     hasCharger?: boolean
     isActive?: boolean
+    size?: string
+    imageUrl?: string | null
     surgeLogs?: SurgePricingLogUncheckedCreateNestedManyWithoutSpotInput
   }
 
@@ -9260,6 +9328,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     hasCharger?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    size?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     owner?: UserUpdateOneRequiredWithoutSpotsNestedInput
     surgeLogs?: SurgePricingLogUpdateManyWithoutSpotNestedInput
   }
@@ -9275,6 +9345,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     hasCharger?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    size?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     surgeLogs?: SurgePricingLogUncheckedUpdateManyWithoutSpotNestedInput
   }
 
@@ -9342,6 +9414,8 @@ export namespace Prisma {
     description?: string | null
     hasCharger?: boolean
     isActive?: boolean
+    size?: string
+    imageUrl?: string | null
     owner: UserCreateNestedOneWithoutSpotsInput
     bookings?: BookingCreateNestedManyWithoutSpotInput
   }
@@ -9357,6 +9431,8 @@ export namespace Prisma {
     description?: string | null
     hasCharger?: boolean
     isActive?: boolean
+    size?: string
+    imageUrl?: string | null
     bookings?: BookingUncheckedCreateNestedManyWithoutSpotInput
   }
 
@@ -9385,6 +9461,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     hasCharger?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    size?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     owner?: UserUpdateOneRequiredWithoutSpotsNestedInput
     bookings?: BookingUpdateManyWithoutSpotNestedInput
   }
@@ -9400,6 +9478,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     hasCharger?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    size?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     bookings?: BookingUncheckedUpdateManyWithoutSpotNestedInput
   }
 
@@ -9475,6 +9555,8 @@ export namespace Prisma {
     description?: string | null
     hasCharger?: boolean
     isActive?: boolean
+    size?: string
+    imageUrl?: string | null
   }
 
   export type BookingCreateManyRenterInput = {
@@ -9497,6 +9579,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     hasCharger?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    size?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     bookings?: BookingUpdateManyWithoutSpotNestedInput
     surgeLogs?: SurgePricingLogUpdateManyWithoutSpotNestedInput
   }
@@ -9511,6 +9595,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     hasCharger?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    size?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     bookings?: BookingUncheckedUpdateManyWithoutSpotNestedInput
     surgeLogs?: SurgePricingLogUncheckedUpdateManyWithoutSpotNestedInput
   }
@@ -9525,6 +9611,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     hasCharger?: BoolFieldUpdateOperationsInput | boolean
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    size?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type BookingUpdateWithoutRenterInput = {

@@ -15,41 +15,39 @@ router.post('/', async (req: Request, res: Response) => {
         const token = authHeader.split(' ')[1];
         const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
 
-        const { street, houseNumber, city, hourlyRate, description } = req.body;
+        // 1. Odbieramy nowe pola z żądania
+        const { city, street, houseNumber, hourlyRate, description, size, evcharger } = req.body;
 
+        // 2. Geokodowanie (kod z poprzednich kroków zostaje)
         const geoUrl = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1` +
             `&street=${encodeURIComponent(houseNumber + ' ' + street)}` +
             `&city=${encodeURIComponent(city)}` +
             `&country=Poland&limit=1`;
 
-        const geoResponse = await fetch(geoUrl, {
-            headers: { 'User-Agent': 'ParkChainApp/1.0' }
-        });
+        const geoResponse = await fetch(geoUrl, { headers: { 'User-Agent': 'ParkChainApp/1.0' } });
         const geoData = await geoResponse.json();
 
         if (!geoData || geoData.length === 0) {
-            return res.status(400).json({ error: 'Nie znaleziono takiego adresu. Sprawdź czy dane są poprawne.' });
+            return res.status(400).json({ error: 'Address not found.' });
         }
 
-        const fullAddress = `${street} ${houseNumber}, ${city}`;
-        const latitude = parseFloat(geoData[0].lat);
-        const longitude = parseFloat(geoData[0].lon);
-
+        // 3. Zapisujemy z nowymi polami
         const newSpot = await prisma.parkingSpot.create({
             data: {
                 ownerId: decoded.userId,
-                address: fullAddress,
+                address: `${street} ${houseNumber}, ${city}`,
+                city,
+                latitude: parseFloat(geoData[0].lat),
+                longitude: parseFloat(geoData[0].lon),
                 hourlyRate,
                 description,
-                city: city,
-                latitude,
-                longitude
+                size: size,
+                hasCharger: evcharger === 'yes', // Konwersja na true/false
             }
         });
 
         res.status(201).json(newSpot);
     } catch (error) {
-        console.error("Błąd zapisu do bazy:", error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });

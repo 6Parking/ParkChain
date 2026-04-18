@@ -20,6 +20,7 @@ export default function RentOutScreen({ route, navigation }: any) {
     const [price, setPrice] = useState('');
     const [size, setSize] = useState('medium');
     const [evcharger, setEvcharger] = useState('no');
+    const [roofed, setRoofed] = useState('no');
     const [description, setDescription] = useState('');
     const [loading, setLoading] = useState(false);
     const [suggestingPrice, setSuggestingPrice] = useState(false);
@@ -103,6 +104,7 @@ export default function RentOutScreen({ route, navigation }: any) {
         setPrice(data.hourlyRate?.toString() || '');
         setSize(data.size || 'medium');
         setEvcharger(data.hasCharger ? 'yes' : 'no');
+        setRoofed(data.hasRoof ? 'yes' : 'no');
         setDescription(data.description || '');
         if (data.availabilityMode) setAvailabilityMode(data.availabilityMode);
 
@@ -251,6 +253,7 @@ export default function RentOutScreen({ route, navigation }: any) {
                     description: description.trim(),
                     size: size,
                     hasCharger: evcharger === 'yes',
+                    hasRoof: roofed === 'yes',
                     latitude: coordinate.latitude,
                     longitude: coordinate.longitude,
                     availabilityMode: availabilityMode,
@@ -411,6 +414,19 @@ export default function RentOutScreen({ route, navigation }: any) {
                             ]}
                             theme={{ colors: { secondaryContainer: '#4c4d4c', onSecondaryContainer: 'white' } }}
                         />
+
+                        <Text style={styles.label}>Roofed</Text>
+                        <SegmentedButtons
+                            style={styles.segmentedButtons}
+                            value={roofed}
+                            onValueChange={setRoofed}
+                            buttons={[
+                                { value: 'no', label: 'No' },
+                                { value: 'yes', label: 'Yes' },
+                            ]}
+                            theme={{ colors: { secondaryContainer: '#4c4d4c', onSecondaryContainer: 'white' } }}
+                        />
+
                         <Text style={styles.label}>Availability Mode</Text>
                         <SegmentedButtons
                             style={styles.segmentedButtons}
@@ -421,7 +437,7 @@ export default function RentOutScreen({ route, navigation }: any) {
                                 { value: 'RECURRING', label: 'Days' },
                                 { value: 'ONCE', label: 'Once' },
                             ]}
-                            theme={{ colors: { secondaryContainer: '#6C63FF', onSecondaryContainer: 'white' } }}
+                            theme={{ colors: { secondaryContainer: '#4c4d4c', onSecondaryContainer: 'white' } }}
                         />
 
 

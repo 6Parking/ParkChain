@@ -30,6 +30,7 @@ model ParkingSpot {
   hourlyRate  Float
   description String?
   hasCharger  Boolean   @default(false)
+  hasRoof     Boolean   @default(false)
   isActive    Boolean   @default(true)
   size        String    @default("medium")
   imageUrl    String?

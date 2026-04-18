@@ -2,9 +2,9 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 
-// Importy tras
 import authRoutes from './routes/auth';
 import parkingRoutes from './routes/parking';
+import servicesRoutes from './routes/services/pricing'
 
 const app = express();
 
@@ -12,14 +12,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Podpięcie tras (Routery)
-app.use('/api', authRoutes);         // Logowanie i Rejestracja
-app.use('/api/parking', parkingRoutes); // Wszystko związane z parkingami (dodawanie, pobieranie, geokodowanie)
+app.use('/api', authRoutes);
+app.use('/api/parking', parkingRoutes);
+app.use('/api/services', servicesRoutes);
 
-// Start serwera
 const PORT = 3000;
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, '127.0.0.1', () => {
     console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
     console.log(`📍 Auth endpoints: http://localhost:${PORT}/api/register | /api/login`);
     console.log(`📍 Parking endpoints: http://localhost:${PORT}/api/parking | /api/parking/my-spots`);
+    console.log(`  Services endpoints: http://localhost:${PORT}/api/services `);
 });

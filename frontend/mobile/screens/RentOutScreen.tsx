@@ -8,6 +8,8 @@ import * as SecureStore from 'expo-secure-store';
 import { URL } from '../config';
 import { SegmentedButtons } from 'react-native-paper';
 import * as ImagePicker from 'expo-image-picker';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import * as Location from 'expo-location';
 
 export default function RentOutScreen({ route, navigation }: any) {
     const [city, setCity] = useState('');
@@ -21,8 +23,16 @@ export default function RentOutScreen({ route, navigation }: any) {
     const [suggestingPrice, setSuggestingPrice] = useState(false); // Nowy stan dla AI
     const [image, setImage] = useState<string | null>(null);
 
+
+    // Map State
+    const [coordinate, setCoordinate] = useState({
+        latitude: 52.2297, // Default Warsaw
+        longitude: 21.0122,
+    });
+
     const spot = route.params?.spot;
 
+    // Initialize data if editing an existing spot, or grab user's GPS if creating a new one
     useEffect(() => {
         if (spot) {
             setCity(spot.city || '');
@@ -32,46 +42,62 @@ export default function RentOutScreen({ route, navigation }: any) {
             setSize(spot.size || 'medium');
             setEvcharger(spot.hasCharger ? 'yes' : 'no');
             setDescription(spot.description || '');
+            if (spot.latitude && spot.longitude) {
+                setCoordinate({ latitude: spot.latitude, longitude: spot.longitude });
+            }
         } else {
-            setCity(''); setStreet(''); setHouseNumber(''); setPrice('');
-            setDescription(''); setSize('medium'); setEvcharger('no');
+            (async () => {
+                let { status } = await Location.requestForegroundPermissionsAsync();
+                if (status === 'granted') {
+                    let loc = await Location.getCurrentPositionAsync({});
+                    setCoordinate({
+                        latitude: loc.coords.latitude,
+                        longitude: loc.coords.longitude
+                    });
+                    // Reverse geocode initial location
+                    handleReverseGeocode(loc.coords.latitude, loc.coords.longitude);
+                }
+            })();
         }
     }, [spot]);
 
-    // ✨ NOWA FUNKCJA: Sugerowanie ceny przez AI
-    const handleSuggestPrice = async () => {
-        if (!city.trim() || !street.trim() || !houseNumber.trim()) {
-            Alert.alert('Address Required', 'Please enter City, Street, and No. first so AI can locate your spot.');
-            return;
+    // Reverse Geocoding: translates GPS coordinates to real addresses
+    const handleReverseGeocode = async (lat: number, lng: number) => {
+        try {
+            const addressArray = await Location.reverseGeocodeAsync({ latitude: lat, longitude: lng });
+            if (addressArray.length > 0) {
+                const addr = addressArray[0];
+                setCity(addr.city || addr.subregion || '');
+                setStreet(addr.street || '');
+                setHouseNumber(addr.streetNumber || '');
+            }
+        } catch (error) {
+            console.error('Geocoding error:', error);
         }
+    };
 
+    // Update pin location and fetch address when user taps the map
+    const handleMapPress = (e: any) => {
+        const { latitude, longitude } = e.nativeEvent.coordinate;
+        setCoordinate({ latitude, longitude });
+        handleReverseGeocode(latitude, longitude);
+    };
+
+    // ✨ OPTIMIZED AI FUNCTION: Now uses exact map coordinates instantly!
+    const handleSuggestPrice = async () => {
         setSuggestingPrice(true);
         try {
-            // 1. Tłumaczenie adresu na koordynaty GPS (Nominatim API)
-            const geoUrl = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&street=${encodeURIComponent(houseNumber + ' ' + street)}&city=${encodeURIComponent(city)}&limit=1`;
-            const geoResponse = await fetch(geoUrl, { headers: { 'User-Agent': 'ParkChainApp/1.0' } });
-            const geoData = await geoResponse.json();
-
-            if (!geoData || geoData.length === 0) {
-                Alert.alert('Location Not Found', 'Could not find this address on the map.');
-                setSuggestingPrice(false);
-                return;
-            }
-
-            const lat = geoData[0].lat;
-            const lng = geoData[0].lon;
-
             // 2. Zapytanie do Twojego backendu AI
             const currentHour = new Date().getHours() + ":00";
             const response = await fetch(`${URL}/pricing/suggestPrice`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    lat: lat,
-                    lng: lng,
-                    standardPrice: 5.0, // Przykładowa bazowa cena
+                    lat: coordinate.latitude,   // We now use map coordinates directly!
+                    lng: coordinate.longitude,
+                    standardPrice: 5.0, // egz. price
                     hour: currentHour,
-                    weather: 'sunny', // Na ten moment statyczna pogoda
+                    weather: 'sunny', // statistic weather
                     isEventNearby: false
                 }),
             });
@@ -117,7 +143,10 @@ export default function RentOutScreen({ route, navigation }: any) {
                     hourlyRate: parseFloat(price.replace(',', '.')),
                     description: description.trim(),
                     size: size,
-                    hasCharger: evcharger === 'yes'
+                    hasCharger: evcharger === 'yes',
+                    // Sending exact map coordinates to the backend!
+                    latitude: coordinate.latitude,
+                    longitude: coordinate.longitude
                 }),
             });
 
@@ -158,6 +187,32 @@ export default function RentOutScreen({ route, navigation }: any) {
                         <Text style={styles.subtitle}>Provide details about your parking space</Text>
                     </View>
 
+                    {/* INTERACTIVE MAP FOR DROPPING PIN */}
+                    <View style={styles.mapContainer}>
+                        <MapView
+                            style={styles.map}
+                            provider={PROVIDER_GOOGLE}
+                            initialRegion={{
+                                latitude: coordinate.latitude,
+                                longitude: coordinate.longitude,
+                                latitudeDelta: 0.01,
+                                longitudeDelta: 0.01,
+                            }}
+                            region={{
+                                latitude: coordinate.latitude,
+                                longitude: coordinate.longitude,
+                                latitudeDelta: 0.01,
+                                longitudeDelta: 0.01,
+                            }}
+                            onPress={handleMapPress}
+                        >
+                            <Marker coordinate={coordinate} title="Your Parking Spot" />
+                        </MapView>
+                        <View style={styles.mapOverlay}>
+                            <Text style={styles.mapInstruction}>Tap map to set location 📍</Text>
+                        </View>
+                    </View>
+
                     <View style={styles.form}>
                         <Text style={styles.label}>City</Text>
                         <TextInput style={styles.input} placeholder="e.g. Warsaw" value={city} onChangeText={setCity} />
@@ -173,7 +228,7 @@ export default function RentOutScreen({ route, navigation }: any) {
                             </View>
                         </View>
 
-                        {/* SEKCJA Z CENĄ I PRZYCISKIEM AI */}
+                        {/* Prize section and AI button */}
                         <Text style={styles.label}>Price per hour (PLN)</Text>
                         <View style={styles.priceRowContainer}>
                             <TextInput
@@ -230,7 +285,8 @@ export default function RentOutScreen({ route, navigation }: any) {
                             onChangeText={setDescription}
                         />
 
-                        <Text style={styles.label}>Photo</Text>
+                        {/* FAKE PHOTO UPLOAD FOR PITCHING / DEMO PURPOSES */}
+                        <Text style={styles.label}>Photo (Demo UI)</Text>
                         <TouchableOpacity style={styles.imagePlaceholder} onPress={pickImage}>
                             {image ? (
                                 <Image source={{ uri: image }} style={styles.previewImage} />
@@ -264,6 +320,44 @@ const styles = StyleSheet.create({
     header: { marginBottom: 25 },
     title: { fontSize: 26, fontWeight: '800', color: '#1A1A1A' },
     subtitle: { fontSize: 15, color: '#666', marginTop: 5 },
+
+    // Map Styles
+    mapContainer: {
+        height: 200,
+        borderRadius: 20,
+        overflow: 'hidden',
+        marginBottom: 20,
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+        elevation: 3,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+    },
+    map: {
+        ...StyleSheet.absoluteFillObject,
+    },
+    mapOverlay: {
+        position: 'absolute',
+        top: 10,
+        alignSelf: 'center',
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        paddingHorizontal: 15,
+        paddingVertical: 6,
+        borderRadius: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 2,
+    },
+    mapInstruction: {
+        fontSize: 12,
+        fontWeight: '700',
+        color: '#1A1A1A',
+    },
+
     form: {
         backgroundColor: '#fff',
         padding: 20,

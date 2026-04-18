@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
     StyleSheet, Text, View, TextInput, TouchableOpacity,
-    Alert, ScrollView, SafeAreaView, KeyboardAvoidingView,
+    Alert, ScrollView, KeyboardAvoidingView,
     Platform, Image, ActivityIndicator
 } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
@@ -10,6 +10,7 @@ import { SegmentedButtons } from 'react-native-paper';
 import * as ImagePicker from 'expo-image-picker';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function RentOutScreen({ route, navigation }: any) {
     const [city, setCity] = useState('');

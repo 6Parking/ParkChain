@@ -1,7 +1,8 @@
 import React, { useCallback } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Platform, ScrollView, KeyboardAvoidingView, Alert, BackHandler } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, KeyboardAvoidingView, Alert, BackHandler } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import { useFocusEffect } from "@react-navigation/native";
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HomeScreen({ navigation, onLogout }: any) {
   useFocusEffect(

@@ -5,13 +5,13 @@ import {
     View,
     FlatList,
     TouchableOpacity,
-    SafeAreaView,
     ActivityIndicator,
     RefreshControl
 } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { URL } from '../config'; // Imported from teammate's code
 
 // Added navigation prop to the component

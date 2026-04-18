@@ -4,9 +4,9 @@ import {
     Text,
     View,
     TouchableOpacity,
-    SafeAreaView,
     StatusBar, Platform
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function RentResult({route, navigation}: any) {
     const spot = route?.params?.spot || {address: 'Unknown location'}

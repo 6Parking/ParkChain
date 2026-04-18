@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import {
-    StyleSheet, Text, View, FlatList, TouchableOpacity,
-    SafeAreaView, ActivityIndicator, RefreshControl, Alert
+    StyleSheet, Text, View, FlatList, TouchableOpacity, ActivityIndicator, RefreshControl, Alert
 } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { URL } from '../config';
 
 interface MyRent {

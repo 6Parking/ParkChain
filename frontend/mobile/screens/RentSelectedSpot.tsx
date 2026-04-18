@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { SafeAreaView, StyleSheet, Text, View, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
 import { Picker } from '@react-native-picker/picker';
 import * as SecureStore from 'expo-secure-store';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { URL } from '../config'; // Upewnij się, że masz ten import
 
 export default function RentSelectedSpot({ route, navigation }: any) {

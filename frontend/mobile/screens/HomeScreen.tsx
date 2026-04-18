@@ -1,9 +1,41 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
+import React, {useCallback} from 'react';
+import {View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Alert, BackHandler} from 'react-native';
 import * as SecureStore from 'expo-secure-store';
+import {useFocusEffect} from "@react-navigation/native";
 
 export default function HomeScreen({ navigation, onLogout }: any) {
 
+    useFocusEffect(
+        useCallback(() => {
+            const onBackPress = () => {
+                Alert.alert(
+                    'Wyjście z aplikacji', 
+                    'Czy na pewno chcesz wyjść z aplikacji?', 
+                    [
+                        {
+                            text: 'Anuluj',
+                            onPress: () => null, 
+                            style: 'cancel',
+                        },
+                        {
+                            text: 'Wyjdź',
+                            onPress: () => BackHandler.exitApp(),
+                            style: 'destructive', 
+                        },
+                    ],
+                    { cancelable: true } 
+                );
+                return true;
+            };
+
+            const backHandlerSubscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+            return () => {
+                backHandlerSubscription.remove();
+            };
+        }, [])
+    );
+    
     const handleLogout = async () => {
         await SecureStore.deleteItemAsync('userToken');
         if (onLogout) onLogout();

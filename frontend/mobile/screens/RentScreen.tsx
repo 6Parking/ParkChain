@@ -65,21 +65,18 @@ export default function RentScreen({ navigation }: any) {
             }
         })();
 
-        fetchSpots(); // Call teammate's fetch function
+        fetchSpots(); 
     }, []);
 
-    // Pull-to-refresh logic
     const onRefresh = () => {
         setRefreshing(true);
         fetchSpots();
     };
 
-    // Navigation function used by both list and map button
     const handleBookSpot = (spot: any) => {
-        // Map backend schema (hourlyRate) to what RentSelectedSpot expects (price)
         const formattedSpot = {
             ...spot,
-            price: spot.hourlyRate.toString(), // RentSelectedSpot expects a string for basePrice parsing
+            price: spot.hourlyRate.toString(),
         };
         navigation.navigate('RentSelectedSpot', { spot: formattedSpot });
     };
@@ -93,7 +90,6 @@ export default function RentScreen({ navigation }: any) {
         );
     }
 
-    // Teammate's updated List View rendering function
     const renderList = () => (
         <FlatList
             data={spots}
@@ -107,7 +103,6 @@ export default function RentScreen({ navigation }: any) {
                 <TouchableOpacity
                     style={styles.spotCard}
                     activeOpacity={0.7}
-                    // Changed onPress to navigate directly
                     onPress={() => handleBookSpot(item)}
                 >
                     <View style={{ flex: 1 }}>
@@ -118,8 +113,7 @@ export default function RentScreen({ navigation }: any) {
                         ) : null}
                     </View>
                     <View style={styles.priceTag}>
-                        {/* Updated to teammate's database schema: hourlyRate */}
-                        <Text style={styles.price}>{item.hourlyRate} PLN</Text>
+                        <Text style={styles.price}>{item.hourlyRate}PLN</Text>
                         <Text style={styles.perHour}>/h</Text>
                     </View>
                 </TouchableOpacity>

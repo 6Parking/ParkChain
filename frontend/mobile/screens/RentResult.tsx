@@ -13,16 +13,13 @@ export default function RentResult({route, navigation}: any) {
     const totalPrice = route?.params?.totalPrice || '0';
     const handleReturnToMain = () => {
         navigation.reset({
-            index: 0, // Wskazuje, który ekran w nowym stosie ma być aktywny (0 to pierwszy)
-            routes: [{ name: 'MainScreen' }], // Tablica z nową historią ekranów (tutaj tylko jeden)
+            index: 0, 
+            routes: [{ name: 'MainScreen' }], 
         });
     };
 
     return (
         <SafeAreaView style={styles.container}>
-            {/*<Text style={styles.headerTitle}>*/}
-            {/*    You have successfully rented a parking spot at {spot.address} for {totalPrice}zł.*/}
-            {/*</Text>*/}
             <StatusBar barStyle="dark-content" />
 
             <View style={styles.content}>

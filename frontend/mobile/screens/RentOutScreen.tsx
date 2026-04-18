@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
     StyleSheet, Text, View, TextInput, TouchableOpacity,
     Alert, ScrollView, SafeAreaView, KeyboardAvoidingView,
-    Platform, Image,
+    Platform, Image, ActivityIndicator
 } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { URL } from '../config';
@@ -18,27 +18,78 @@ export default function RentOutScreen({ route, navigation }: any) {
     const [evcharger, setEvcharger] = useState('no');
     const [description, setDescription] = useState('');
     const [loading, setLoading] = useState(false);
+    const [suggestingPrice, setSuggestingPrice] = useState(false); // Nowy stan dla AI
     const [image, setImage] = useState<string | null>(null);
 
-    // Pobieramy spot z parametrów (jeśli edycja)
     const spot = route.params?.spot;
 
     useEffect(() => {
         if (spot) {
             setCity(spot.city || '');
-            // Jeśli adres jest złączony, a chcesz go edytować, wpisujemy go w ulicę:
             setStreet(spot.street || '');
-            setHouseNumber(spot.houseNumber || ''); // Uzupełnij jeśli masz to w backendzie osobo
+            setHouseNumber(spot.houseNumber || '');
             setPrice(spot.hourlyRate?.toString() || '');
             setSize(spot.size || 'medium');
             setEvcharger(spot.hasCharger ? 'yes' : 'no');
             setDescription(spot.description || '');
         } else {
-            // Czyścimy formularz jeśli wchodzimy w tryb "Dodaj"
             setCity(''); setStreet(''); setHouseNumber(''); setPrice('');
             setDescription(''); setSize('medium'); setEvcharger('no');
         }
     }, [spot]);
+
+    // ✨ NOWA FUNKCJA: Sugerowanie ceny przez AI
+    const handleSuggestPrice = async () => {
+        if (!city.trim() || !street.trim() || !houseNumber.trim()) {
+            Alert.alert('Address Required', 'Please enter City, Street, and No. first so AI can locate your spot.');
+            return;
+        }
+
+        setSuggestingPrice(true);
+        try {
+            // 1. Tłumaczenie adresu na koordynaty GPS (Nominatim API)
+            const geoUrl = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&street=${encodeURIComponent(houseNumber + ' ' + street)}&city=${encodeURIComponent(city)}&limit=1`;
+            const geoResponse = await fetch(geoUrl, { headers: { 'User-Agent': 'ParkChainApp/1.0' } });
+            const geoData = await geoResponse.json();
+
+            if (!geoData || geoData.length === 0) {
+                Alert.alert('Location Not Found', 'Could not find this address on the map.');
+                setSuggestingPrice(false);
+                return;
+            }
+
+            const lat = geoData[0].lat;
+            const lng = geoData[0].lon;
+
+            // 2. Zapytanie do Twojego backendu AI
+            const currentHour = new Date().getHours() + ":00";
+            const response = await fetch(`${URL}/pricing/suggestPrice`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    lat: lat,
+                    lng: lng,
+                    standardPrice: 5.0, // Przykładowa bazowa cena
+                    hour: currentHour,
+                    weather: 'sunny', // Na ten moment statyczna pogoda
+                    isEventNearby: false
+                }),
+            });
+
+            const data = await response.json();
+            if (data.price) {
+                setPrice(data.price.toString()); // Wpisanie ceny do pola
+            } else {
+                Alert.alert('Error', 'AI could not generate a price.');
+            }
+
+        } catch (error) {
+            console.error(error);
+            Alert.alert('Connection Error', 'Could not reach the AI pricing server.');
+        } finally {
+            setSuggestingPrice(false);
+        }
+    };
 
     const handlePublish = async () => {
         if (!city.trim() || !street.trim() || !houseNumber.trim() || !price.trim()) {
@@ -66,7 +117,7 @@ export default function RentOutScreen({ route, navigation }: any) {
                     hourlyRate: parseFloat(price.replace(',', '.')),
                     description: description.trim(),
                     size: size,
-                    hasCharger: evcharger === 'yes' // Backend oczekuje 'hasCharger' (boolean)
+                    hasCharger: evcharger === 'yes'
                 }),
             });
 
@@ -90,7 +141,7 @@ export default function RentOutScreen({ route, navigation }: any) {
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
             aspect: [4, 3],
-            quality: 0.5, // Kompresja dla bazy danych
+            quality: 0.5,
         });
 
         if (!result.canceled) {
@@ -109,21 +160,41 @@ export default function RentOutScreen({ route, navigation }: any) {
 
                     <View style={styles.form}>
                         <Text style={styles.label}>City</Text>
-                        <TextInput style={styles.input} placeholder="e.g. London" value={city} onChangeText={setCity} />
+                        <TextInput style={styles.input} placeholder="e.g. Warsaw" value={city} onChangeText={setCity} />
 
                         <View style={styles.row}>
                             <View style={{ flex: 0.7 }}>
                                 <Text style={styles.label}>Street</Text>
-                                <TextInput style={styles.input} placeholder="e.g. Baker St" value={street} onChangeText={setStreet} />
+                                <TextInput style={styles.input} placeholder="e.g. Długa" value={street} onChangeText={setStreet} />
                             </View>
                             <View style={{ flex: 0.25 }}>
                                 <Text style={styles.label}>No.</Text>
-                                <TextInput style={styles.input} placeholder="221B" value={houseNumber} onChangeText={setHouseNumber} />
+                                <TextInput style={styles.input} placeholder="12" value={houseNumber} onChangeText={setHouseNumber} />
                             </View>
                         </View>
 
-                        <Text style={styles.label}>Price per hour ($)</Text>
-                        <TextInput style={styles.input} placeholder="e.g. 4.50" keyboardType="numeric" value={price} onChangeText={setPrice} />
+                        {/* SEKCJA Z CENĄ I PRZYCISKIEM AI */}
+                        <Text style={styles.label}>Price per hour (PLN)</Text>
+                        <View style={styles.priceRowContainer}>
+                            <TextInput
+                                style={[styles.input, { flex: 1, marginBottom: 0 }]}
+                                placeholder="e.g. 5.50"
+                                keyboardType="numeric"
+                                value={price}
+                                onChangeText={setPrice}
+                            />
+                            <TouchableOpacity
+                                style={styles.aiButton}
+                                onPress={handleSuggestPrice}
+                                disabled={suggestingPrice}
+                            >
+                                {suggestingPrice ? (
+                                    <ActivityIndicator size="small" color="#fff" />
+                                ) : (
+                                    <Text style={styles.aiButtonText}>✨ AI Suggest</Text>
+                                )}
+                            </TouchableOpacity>
+                        </View>
 
                         <Text style={styles.label}>Spot Size</Text>
                         <SegmentedButtons
@@ -187,8 +258,6 @@ export default function RentOutScreen({ route, navigation }: any) {
     );
 }
 
-// ... styles bez zmian
-
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#F8F9FA' },
     scrollContent: { padding: 25 },
@@ -206,14 +275,35 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
     },
     row: { flexDirection: 'row', justifyContent: 'space-between' },
-    label: { fontSize: 13, fontWeight: '700', color: '#444', marginBottom: 8, marginLeft: 2 },
+    label: { fontSize: 13, fontWeight: '700', color: '#444', marginBottom: 8, marginLeft: 2, marginTop: 10 },
     input: {
         backgroundColor: '#F3F4F6',
         padding: 14,
         borderRadius: 10,
-        marginBottom: 18,
+        marginBottom: 10,
         fontSize: 16,
         color: '#1A1A1A'
+    },
+    // STYLE DLA RZĘDU Z CENĄ I PRZYCISKIEM AI:
+    priceRowContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 18,
+    },
+    aiButton: {
+        backgroundColor: '#6C63FF', // Ładny fioletowy kolor pod AI
+        paddingVertical: 14,
+        paddingHorizontal: 15,
+        borderRadius: 10,
+        marginLeft: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: 52, // Dopasowanie wysokości do TextInput
+    },
+    aiButtonText: {
+        color: '#fff',
+        fontWeight: '700',
+        fontSize: 14,
     },
     textArea: { height: 80, textAlignVertical: 'top' },
     submitButton: {
@@ -225,7 +315,7 @@ const styles = StyleSheet.create({
     },
     disabledButton: { backgroundColor: '#94d3a2' },
     submitText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
-    segmentedButtons: { marginBottom: 20 },
+    segmentedButtons: { marginBottom: 10 },
     imagePlaceholder: {
         backgroundColor: '#F3F4F6',
         height: 160,

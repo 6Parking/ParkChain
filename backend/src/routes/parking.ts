@@ -22,7 +22,7 @@ router.post('/', async (req: Request, res: Response) => {
         const geoUrl = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1` +
             `&street=${encodeURIComponent(houseNumber + ' ' + street)}` +
             `&city=${encodeURIComponent(city)}` +
-            `&country=Poland&limit=1`;
+            `&limit=1`;
 
         const geoResponse = await fetch(geoUrl, { headers: { 'User-Agent': 'ParkChainApp/1.0' } });
         const geoData = await geoResponse.json();

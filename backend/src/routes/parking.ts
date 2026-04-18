@@ -1,0 +1,139 @@
+import { Router, type Request, type Response } from 'express';
+import { prisma } from '../db';
+import jwt from 'jsonwebtoken';
+
+const router = Router();
+const JWT_SECRET = 'your_jwt_secret_key_123';
+
+router.post('/', async (req: Request, res: Response) => {
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader) {
+            return res.status(401).json({ error: 'No authorization token' });
+        }
+
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
+
+        // 1. Odbieramy nowe pola z żądania
+        const { city, street, houseNumber, hourlyRate, description, size, evcharger } = req.body;
+
+        // 2. Geokodowanie (kod z poprzednich kroków zostaje)
+        const geoUrl = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1` +
+            `&street=${encodeURIComponent(houseNumber + ' ' + street)}` +
+            `&city=${encodeURIComponent(city)}` +
+            `&country=Poland&limit=1`;
+
+        const geoResponse = await fetch(geoUrl, { headers: { 'User-Agent': 'ParkChainApp/1.0' } });
+        const geoData = await geoResponse.json();
+
+        if (!geoData || geoData.length === 0) {
+            return res.status(400).json({ error: 'Address not found.' });
+        }
+
+        // 3. Zapisujemy z nowymi polami
+        const newSpot = await prisma.parkingSpot.create({
+            data: {
+                ownerId: decoded.userId,
+                address: `${street} ${houseNumber}, ${city}`,
+                city: city,
+                street: street,
+                houseNumber: houseNumber,
+                latitude: parseFloat(geoData[0].lat),
+                longitude: parseFloat(geoData[0].lon),
+                hourlyRate,
+                description,
+                size: size,
+                hasCharger: evcharger === 'yes', // Konwersja na true/false
+            }
+        });
+
+        res.status(201).json(newSpot);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+router.put('/:id', async (req: Request, res: Response) => {
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader) return res.status(401).json({ error: 'No token' });
+
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
+        const spotId = parseInt(req.params.id as string);
+
+        const { city, street, houseNumber, hourlyRate, description, size, hasCharger } = req.body;
+
+        // Sprawdzamy, czy użytkownik jest właścicielem tego miejsca
+        const existingSpot = await prisma.parkingSpot.findUnique({
+            where: { id: spotId }
+        });
+
+        if (!existingSpot || existingSpot.ownerId !== decoded.userId) {
+            return res.status(403).json({ error: 'Unauthorized to edit this spot' });
+        }
+
+        const updatedSpot = await prisma.parkingSpot.update({
+            where: { id: spotId },
+            data: {
+                city,
+                street,
+                houseNumber,
+                address: `${street} ${houseNumber}, ${city}`,
+                hourlyRate,
+                description,
+                size,
+                hasCharger: hasCharger // React Native wysyła już boolean
+            }
+        });
+
+        res.json(updatedSpot);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to update spot' });
+    }
+});
+
+router.get('/', async (req: Request, res: Response) => {
+    try {
+        const spots = await prisma.parkingSpot.findMany({
+            where: {
+                isActive: true // Pobieramy tylko aktywne ogłoszenia
+            },
+            include: {
+                owner: {
+                    select: {
+                        username: true // Możemy dołączyć nazwę właściciela, jeśli chcemy
+                    }
+                }
+            }
+        });
+
+        res.json(spots);
+    } catch (error) {
+        console.error("Błąd pobierania miejsc:", error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+router.get('/my-spots', async (req: Request, res: Response) => {
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader) return res.status(401).json({ error: 'No token provided' });
+
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
+
+        const mySpots = await prisma.parkingSpot.findMany({
+            where: {
+                ownerId: decoded.userId
+            }
+        });
+
+        res.json(mySpots);
+    } catch (error) {
+        res.status(401).json({ error: 'Invalid token' });
+    }
+});
+export default router;

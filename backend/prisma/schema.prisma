@@ -24,12 +24,15 @@ model ParkingSpot {
   latitude    Float
   longitude   Float
   city        String
+  street      String    @default("")
+  houseNumber String    @default("")
   address     String
   hourlyRate  Float
   description String?
   hasCharger  Boolean   @default(false)
   isActive    Boolean   @default(true)
-
+  size        String    @default("medium")
+  imageUrl    String?
   owner       User      @relation("UserSpots", fields: [ownerId], references: [id])
   bookings    Booking[]
   surgeLogs   SurgePricingLog[]

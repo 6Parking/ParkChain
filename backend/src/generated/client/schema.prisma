@@ -19,20 +19,23 @@ model User {
 }
 
 model ParkingSpot {
-  id          Int     @id @default(autoincrement())
+  id          Int               @id @default(autoincrement())
   ownerId     Int
   latitude    Float
   longitude   Float
   city        String
+  street      String            @default("")
+  houseNumber String            @default("")
   address     String
   hourlyRate  Float
   description String?
-  hasCharger  Boolean @default(false)
-  isActive    Boolean @default(true)
-
-  owner     User              @relation("UserSpots", fields: [ownerId], references: [id])
-  bookings  Booking[]
-  surgeLogs SurgePricingLog[]
+  hasCharger  Boolean           @default(false)
+  isActive    Boolean           @default(true)
+  size        String            @default("medium")
+  imageUrl    String?
+  owner       User              @relation("UserSpots", fields: [ownerId], references: [id])
+  bookings    Booking[]
+  surgeLogs   SurgePricingLog[]
 }
 
 model Booking {

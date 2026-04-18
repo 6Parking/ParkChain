@@ -205,6 +205,31 @@ export default function RentOutScreen({ route, navigation }: any) {
             return;
         }
 
+
+        if (availabilityMode === 'RECURRING') {
+            if (selectedDays.length === 0) {
+                Alert.alert('Validation Error', 'Please select at least one day.');
+                return;
+            }
+
+            if (startTime.getTime() >= endTime.getTime()) {
+                Alert.alert('Validation Error', 'End time must be after start time.');
+                return;
+            }
+        }
+
+        if (availabilityMode === 'ONCE') {
+            if (startOnce.getTime() >= endOnce.getTime()) {
+                Alert.alert('Validation Error', 'The end date/time must be after the start date/time.');
+                return;
+            }
+
+            if (startOnce.getTime() < new Date().getTime()) {
+                Alert.alert('Validation Error', 'Start time cannot be in the past.');
+                return;
+            }
+        }
+
         setLoading(true);
         try {
             const token = await SecureStore.getItemAsync('userToken');

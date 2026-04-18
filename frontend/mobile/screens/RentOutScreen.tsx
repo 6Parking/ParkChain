@@ -448,7 +448,7 @@ const styles = StyleSheet.create({
         elevation: 2,
     },
     mapInstruction: {
-        fontSize: 12,
+        fontSize: 11,
         fontWeight: '700',
         color: '#1A1A1A',
     },

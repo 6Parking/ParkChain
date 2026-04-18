@@ -131,7 +131,7 @@ export default function ManageRentScreen({ navigation }: any) {
     }
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} edges={['bottom', 'left', 'right']}>
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>My Listings</Text>
                 <Text style={styles.count}>{mySpots.length} rents listed</Text>

@@ -55,7 +55,7 @@ export default function ManageRentOutScreen({ navigation }: any) {
     }
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} edges={['bottom', 'left', 'right']}>
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>My Listings</Text>
                 <Text style={styles.count}>{mySpots.length} spots listed</Text>
@@ -70,7 +70,6 @@ export default function ManageRentOutScreen({ navigation }: any) {
                 contentContainerStyle={{ padding: 20 }}
                 ListEmptyComponent={<Text style={styles.empty}>You haven't added any spots yet.</Text>}
                 renderItem={({ item }) => (
-                    // DODANO TOUCHABLE OPACITY TUTAJ:
                     <TouchableOpacity onPress={() => navigation.navigate('RentOut', { spot: item })}>
                         <View style={styles.spotCard}>
                             <View style={{ flex: 1 }}>

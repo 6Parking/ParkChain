@@ -122,7 +122,7 @@ export default function RentScreen({ navigation }: any) {
     );
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} edges={['bottom', 'left', 'right']}>
             {/* Google Places Search Bar */}
             <View style={styles.searchContainer}>
                 <GooglePlacesAutocomplete
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
     center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     searchContainer: {
         position: 'absolute',
-        top: 50,
+        top: 10,
         width: '100%',
         paddingHorizontal: 20,
         zIndex: 10,
@@ -308,7 +308,7 @@ const styles = StyleSheet.create({
 
     toggleButton: {
         position: 'absolute',
-        bottom: 40,
+        bottom: 60,
         alignSelf: 'center',
         backgroundColor: '#1A1A1A',
         paddingVertical: 12,

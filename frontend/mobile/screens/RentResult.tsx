@@ -19,7 +19,7 @@ export default function RentResult({route, navigation}: any) {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} edges={['bottom', 'left', 'right']}>
             <StatusBar barStyle="dark-content" />
 
             <View style={styles.content}>
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     },
     footer: {
         padding: 20,
-        paddingBottom: Platform.OS === 'ios' ? 20 : 40,
+        paddingBottom: 20,
     },
     mainButton: {
         backgroundColor: '#1A1A1A',

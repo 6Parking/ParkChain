@@ -74,7 +74,7 @@ export default function RentSelectedSpot({ route, navigation }: any) {
     };
 
     return (
-        <SafeAreaView style={styles.safeArea}>
+        <SafeAreaView style={styles.safeArea} edges={['bottom', 'left', 'right']}>
             <View style={styles.container}>
                 {/* KAFELEK 1: Address */}
                 <View style={styles.card}>

@@ -43,24 +43,30 @@ router.post('/suggestPrice', async (req: Request, res: Response) => {
         }
 
         const prompt = `
-    You are an autonomous Smart Pricing AI for parking spaces worldwide. 
-    Your ultimate goal is to calculate the realistic market price for 1 hour of parking strictly in Polish Zloty (PLN).
-    
-    Input data:
-    - GPS Coordinates: ${ctx.lat}, ${ctx.lng}
-    - Current hour: ${ctx.hour}
-    - Weather: ${ctx.weather}
-    - Event nearby: ${ctx.isEventNearby ? 'YES' : 'NO'}
+            You are a highly precise, local parking expert and Smart Pricing AI for parking spaces worldwide.
+            Your ultimate goal is to calculate the realistic market price for 1 hour of private parking strictly in Polish Zloty (PLN).
+            
+            Input data:
+            - GPS Coordinates: ${ctx.lat}, ${ctx.lng}
+            - Current hour: ${ctx.hour}
+            - Weather: ${ctx.weather}
+            - Event nearby: ${ctx.isEventNearby ? 'YES' : 'NO'}
 
-    Follow this internal reasoning process strictly:
-    1. Geolocate the Coordinates and analyze the immediate surroundings.
-    2. Crucial Step: Assess the availability of free place to park in the direct vicinity (within walking distance).
-       - If there is abundant free parking nearby (e.g., residential neighborhoods without paid zones, rural areas, empty lots), the market value of a paid spot drops to near zero. In this case, set the base price extremely low, literally pennies (e.g., 0.10 PLN - 1.00 PLN).
-       - If free parking is scarce or non-existent (e.g., city centers, paid parking zones, commercial districts), set a standard or premium base price appropriate for that specific location.
-    3. Apply Dynamic Market Adjustments: Adjust your estimated base value based on current demand. Increase the price for rush hours, bad weather (people prefer driving), or nearby events.
+            Follow this EXACT internal reasoning process before answering:
+            
+            STEP 1: Identify the exact street, district, and city using the GPS coordinates. 
+            STEP 2: Answer this strict question internally: "Is it legally and practically possible to park for free on the street in this exact immediate vicinity?"
+            STEP 3: Base Value Calculation:
+               - IF YES (free public parking is easily available nearby): The market value of a paid private spot drops to almost nothing. Set the base price to literal pennies (0.50 PLN - 1.50 PLN).
+               - IF NO (it is a strict paid zone, ultra-premium location like Monaco Casino / Manhattan, or free parking is literally impossible): Determine the ACTUAL, REAL-WORLD cost of 1 hour of commercial or municipal parking at this exact location. Think of the real valet/garage/meter cost in the local currency.
+            STEP 4: Currency Conversion: If you found a real-world paid price in Step 3 (e.g., 15 EUR or 25 USD), convert that local currency into Polish Zloty (PLN). (e.g., 1 USD/EUR/GBP ≈ 4 to 5 PLN).
+            STEP 5: Apply dynamic multipliers to the PLN value based on current demand:
+               - Rush hour (07:00-09:00 or 15:00-17:00): increase by 20%
+               - Rain or snow: increase by 10%
+               - Event nearby (YES): increase by 50%
 
-    RETURN ONLY THE FINAL NUMBER IN PLN (e.g., 0.20 or 12.50). Do not add currency symbols, words, or markdown. Just the digits.
-`;
+            RETURN ONLY THE FINAL NUMBER IN PLN (e.g., 0.50 or 145.00). Do not add currency symbols, words, or markdown. Just the digits.
+        `;
 
         const result = await aiModel.generateContent(prompt);
         const textResponse = result.response.text();

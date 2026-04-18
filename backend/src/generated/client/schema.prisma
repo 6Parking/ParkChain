@@ -19,23 +19,38 @@ model User {
 }
 
 model ParkingSpot {
-  id          Int               @id @default(autoincrement())
-  ownerId     Int
-  latitude    Float
-  longitude   Float
-  city        String
-  street      String            @default("")
-  houseNumber String            @default("")
-  address     String
-  hourlyRate  Float
-  description String?
-  hasCharger  Boolean           @default(false)
-  isActive    Boolean           @default(true)
-  size        String            @default("medium")
-  imageUrl    String?
-  owner       User              @relation("UserSpots", fields: [ownerId], references: [id])
-  bookings    Booking[]
-  surgeLogs   SurgePricingLog[]
+  id               Int               @id @default(autoincrement())
+  ownerId          Int
+  latitude         Float
+  longitude        Float
+  city             String
+  street           String            @default("")
+  houseNumber      String            @default("")
+  address          String
+  hourlyRate       Float
+  description      String?
+  hasCharger       Boolean           @default(false)
+  isActive         Boolean           @default(true)
+  size             String            @default("medium")
+  imageUrl         String?
+  availabilityMode String            @default("24_7")
+  owner            User              @relation("UserSpots", fields: [ownerId], references: [id])
+  availabilities   Availability[]
+  bookings         Booking[]
+  surgeLogs        SurgePricingLog[]
+}
+
+model Availability {
+  id     Int @id @default(autoincrement())
+  spotId Int
+
+  // 0 - Sunday
+  dayOfWeek     Int?
+  startDateTime DateTime?
+  endDateTime   DateTime?
+  startTime     String?
+  endTime       String?
+  spot          ParkingSpot @relation(fields: [spotId], references: [id])
 }
 
 model Booking {

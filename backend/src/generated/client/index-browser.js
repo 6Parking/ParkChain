@@ -142,7 +142,18 @@ exports.Prisma.ParkingSpotScalarFieldEnum = {
   hasCharger: 'hasCharger',
   isActive: 'isActive',
   size: 'size',
-  imageUrl: 'imageUrl'
+  imageUrl: 'imageUrl',
+  availabilityMode: 'availabilityMode'
+};
+
+exports.Prisma.AvailabilityScalarFieldEnum = {
+  id: 'id',
+  spotId: 'spotId',
+  dayOfWeek: 'dayOfWeek',
+  startDateTime: 'startDateTime',
+  endDateTime: 'endDateTime',
+  startTime: 'startTime',
+  endTime: 'endTime'
 };
 
 exports.Prisma.BookingScalarFieldEnum = {
@@ -192,6 +203,7 @@ exports.Prisma.NullsOrder = {
 exports.Prisma.ModelName = {
   User: 'User',
   ParkingSpot: 'ParkingSpot',
+  Availability: 'Availability',
   Booking: 'Booking',
   SurgePricingLog: 'SurgePricingLog',
   BlockchainEvent: 'BlockchainEvent'

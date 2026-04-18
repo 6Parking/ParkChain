@@ -185,4 +185,70 @@ router.post('/book', async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Błąd serwera podczas przetwarzania rezerwacji' });
     }
 });
+
+router.get('/my-rents', async (req: Request, res: Response) => {
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader) return res.status(401).json({ error: 'Brak tokenu autoryzacji' });
+
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
+
+        const bookings = await prisma.booking.findMany({
+            where: {
+                renterId: decoded.userId,
+                status: 'PENDING',
+            },
+            include: {
+                spot: true
+            },
+            orderBy: {
+                startTime: 'desc'
+            }
+        });
+
+        res.json(bookings);
+    } catch (error) {
+        console.error("Błąd pobierania wynajmów:", error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+router.delete('/:id', async (req: Request, res: Response) => {
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader) return res.status(401).json({ error: 'No authorization token' });
+
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
+        const bookingId = parseInt(req.params.id as string);
+
+        const booking = await prisma.booking.findUnique({
+            where: { id: bookingId }
+        });
+
+        if (!booking) {
+            return res.status(404).json({ error: 'Booking not found' });
+        }
+
+        if (booking.renterId !== decoded.userId) {
+            return res.status(403).json({ error: 'Unauthorized to cancel this booking' });
+        }
+
+        await prisma.$transaction([
+            prisma.parkingSpot.update({
+                where: { id: booking.spotId },
+                data: { isActive: true }
+            }),
+            prisma.booking.delete({
+                where: { id: bookingId }
+            })
+        ]);
+
+        res.json({ message: 'Booking cancelled and spot is now active' });
+    } catch (error) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 export default router;

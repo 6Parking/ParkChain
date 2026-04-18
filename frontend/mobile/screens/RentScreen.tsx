@@ -119,7 +119,7 @@ export default function RentScreen({ navigation }: any) {
                     </View>
                     <View style={styles.priceTag}>
                         {/* Updated to teammate's database schema: hourlyRate */}
-                        <Text style={styles.price}>${item.hourlyRate}</Text>
+                        <Text style={styles.price}>zl{item.hourlyRate}</Text>
                         <Text style={styles.perHour}>/h</Text>
                     </View>
                 </TouchableOpacity>

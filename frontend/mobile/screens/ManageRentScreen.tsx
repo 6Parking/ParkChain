@@ -6,7 +6,6 @@ import {
 import * as SecureStore from 'expo-secure-store';
 import { URL } from '../config';
 
-
 interface MyRent {
     id: number;
     startTime: string;
@@ -62,6 +61,67 @@ export default function ManageRentScreen({ navigation }: any) {
         fetchMyRents();
     }, []);
 
+    const handleItemPress = (item: any) => {
+        Alert.alert(
+            "Manage Booking",
+            `Spot: ${item.spot.address}\nWhat would you like to do?`,
+            [
+                {
+                    text: "Cancel booking",
+                    onPress: () => confirmCancel(item.id),
+                    style: "destructive",
+                },
+                {
+                    text: "Extend",
+                    // onPress: () => navigation.navigate('ExtendBooking', { booking: item }),
+                },
+                {
+                    text: "Close",
+                    style: "cancel",
+                },
+            ],
+            { cancelable: true }
+        );
+    };
+
+    const confirmCancel = (bookingId: number) => {
+        Alert.alert(
+            "Confirm",
+            "Are you sure you want to cancel this booking? Only 80% will be refunded!",
+            [
+                { text: "No", style: "cancel" },
+                {
+                    text: "Yes, cancel",
+                    onPress: () => handleCancelBooking(bookingId),
+                    style: "destructive"
+                }
+            ]
+        );
+    };
+
+    const handleCancelBooking = async (id: number) => {
+        try {
+            const token = await SecureStore.getItemAsync('userToken');
+
+            const response = await fetch(`${URL}/parking/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                Alert.alert('Success', 'Booking cancelled successfully.');
+                fetchMyRents();
+            } else {
+                const data = await response.json();
+                Alert.alert('Error', data.error || 'Failed to cancel booking.');
+            }
+        } catch (error) {
+            Alert.alert('Connection Error', 'Server is unreachable.');
+        }
+    };
+
     if (loading) {
         return (
             <View style={styles.center}>
@@ -86,15 +146,17 @@ export default function ManageRentScreen({ navigation }: any) {
                 contentContainerStyle={{ padding: 20 }}
                 ListEmptyComponent={<Text style={styles.empty}>You haven't added any spots yet.</Text>}
                 renderItem={({ item }) => (
-                    <View style={styles.spotCard}>
-                        <View style={{ flex: 1 }}>
-                            <Text style={styles.address}>{item.spot.address}</Text>
-                            <Text style={styles.smallText}>{item.spot.size}</Text>
-                            <Text style={styles.smallText}>{formatPL(item.startTime)}</Text>
-                            <Text style={styles.smallText}>{formatPL(item.endTime)}</Text>
+                    <TouchableOpacity onPress={() => handleItemPress(item)} activeOpacity={0.7}>
+                        <View style={styles.spotCard}>
+                            <View style={{ flex: 1 }}>
+                                <Text style={styles.address}>{item.spot.address}</Text>
+                                <Text style={styles.smallText}>Size: {item.spot.size}</Text>
+                                <Text style={styles.smallText}>From: {formatPL(item.startTime)}</Text>
+                                <Text style={styles.smallText}>Until: {formatPL(item.endTime)}</Text>
+                            </View>
+                            <Text style={styles.price}>${item.totalPrice}</Text>
                         </View>
-                        <Text style={styles.price}>${item.totalPrice}</Text>
-                    </View>
+                    </TouchableOpacity>
                 )}
             />
         </SafeAreaView>

@@ -21,9 +21,13 @@ export default function RentOutScreen({ route, navigation }: any) {
     const [evcharger, setEvcharger] = useState('no');
     const [description, setDescription] = useState('');
     const [loading, setLoading] = useState(false);
-    const [suggestingPrice, setSuggestingPrice] = useState(false); // Nowy stan dla AI
+    const [suggestingPrice, setSuggestingPrice] = useState(false);
     const [image, setImage] = useState<string | null>(null);
-
+    const [availabilityMode, setAvailabilityMode] = useState('24_7');
+    const [selectedDays, setSelectedDays] = useState<number[]>([]);
+    const [specificDate, setSpecificDate] = useState('');
+    const [startTime, setStartTime] = useState('08:00');
+    const [endTime, setEndTime] = useState('16:00');
 
     // Map State
     const [coordinate, setCoordinate] = useState({
@@ -43,6 +47,19 @@ export default function RentOutScreen({ route, navigation }: any) {
             setSize(spot.size || 'medium');
             setEvcharger(spot.hasCharger ? 'yes' : 'no');
             setDescription(spot.description || '');
+            if (spot.availabilityMode) setAvailabilityMode(spot.availabilityMode);
+            if (spot.availabilities && spot.availabilities.length > 0) {
+                if (spot.availabilityMode === 'RECURRING') {
+                    const days = spot.availabilities.map((a: any) => a.dayOfWeek);
+                    setSelectedDays(days);
+                }
+                if (spot.availabilityMode === 'ONCE' && spot.availabilities[0].specificDate) {
+                    const dateStr = spot.availabilities[0].specificDate.split('T')[0];
+                    setSpecificDate(dateStr);
+                }
+                setStartTime(spot.availabilities[0].startTime || '08:00');
+                setEndTime(spot.availabilities[0].endTime || '16:00');
+            }
             if (spot.latitude && spot.longitude) {
                 setCoordinate({ latitude: spot.latitude, longitude: spot.longitude });
             }
@@ -100,6 +117,7 @@ export default function RentOutScreen({ route, navigation }: any) {
                     hour: currentHour,
                     weather: 'sunny', // statistic weather
                     isEventNearby: false
+
                 }),
             });
 
@@ -147,7 +165,13 @@ export default function RentOutScreen({ route, navigation }: any) {
                     hasCharger: evcharger === 'yes',
                     // Sending exact map coordinates to the backend!
                     latitude: coordinate.latitude,
-                    longitude: coordinate.longitude
+                    longitude: coordinate.longitude,
+                    availabilityMode: availabilityMode,
+                    availabilityData: availabilityMode === 'RECURRING'
+                        ? { days: selectedDays, start: startTime, end: endTime }
+                        : availabilityMode === 'ONCE'
+                            ? { date: specificDate, start: startTime, end: endTime }
+                            : null
                 }),
             });
 
@@ -276,7 +300,75 @@ export default function RentOutScreen({ route, navigation }: any) {
                             ]}
                             theme={{ colors: { secondaryContainer: '#4c4d4c', onSecondaryContainer: 'white' } }}
                         />
+                        <Text style={styles.label}>Availability Mode</Text>
+                        <SegmentedButtons
+                            style={styles.segmentedButtons}
+                            value={availabilityMode}
+                            onValueChange={setAvailabilityMode}
+                            buttons={[
+                                { value: '24_7', label: '24/7' },
+                                { value: 'RECURRING', label: 'Days' },
+                                { value: 'ONCE', label: 'Once' },
+                            ]}
+                            theme={{ colors: { secondaryContainer: '#6C63FF', onSecondaryContainer: 'white' } }}
+                        />
 
+                        {/* Tryb RECURRING: Wybór dni tygodnia */}
+                        {availabilityMode === 'RECURRING' && (
+                            <View style={styles.subForm}>
+                                <Text style={styles.subLabel}>Active Days</Text>
+                                <View style={styles.daysRow}>
+                                    {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day, index) => (
+                                        <TouchableOpacity
+                                            key={index}
+                                            style={[styles.dayButton, selectedDays.includes(index) && styles.dayButtonActive]}
+                                            onPress={() => {
+                                                setSelectedDays(prev =>
+                                                    prev.includes(index) ? prev.filter(d => d !== index) : [...prev, index]
+                                                );
+                                            }}
+                                        >
+                                            <Text style={[styles.dayButtonText, selectedDays.includes(index) && styles.dayButtonTextActive]}>
+                                                {day}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
+                                <View style={styles.row}>
+                                    <View style={{ flex: 0.48 }}>
+                                        <Text style={styles.subLabel}>From</Text>
+                                        <TextInput style={styles.input} placeholder="08:00" value={startTime} onChangeText={setStartTime} />
+                                    </View>
+                                    <View style={{ flex: 0.48 }}>
+                                        <Text style={styles.subLabel}>To</Text>
+                                        <TextInput style={styles.input} placeholder="16:00" value={endTime} onChangeText={setEndTime} />
+                                    </View>
+                                </View>
+                            </View>
+                        )}
+
+                        {/* Tryb ONCE: Wybór konkretnej daty */}
+                        {availabilityMode === 'ONCE' && (
+                            <View style={styles.subForm}>
+                                <Text style={styles.subLabel}>Specific Date</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="YYYY-MM-DD"
+                                    value={specificDate}
+                                    onChangeText={setSpecificDate}
+                                />
+                                <View style={styles.row}>
+                                    <View style={{ flex: 0.48 }}>
+                                        <Text style={styles.subLabel}>Start Time</Text>
+                                        <TextInput style={styles.input} placeholder="10:00" value={startTime} onChangeText={setStartTime} />
+                                    </View>
+                                    <View style={{ flex: 0.48 }}>
+                                        <Text style={styles.subLabel}>End Time</Text>
+                                        <TextInput style={styles.input} placeholder="18:00" value={endTime} onChangeText={setEndTime} />
+                                    </View>
+                                </View>
+                            </View>
+                        )}
                         <Text style={styles.label}>Additional Description</Text>
                         <TextInput
                             style={[styles.input, styles.textArea]}
@@ -427,4 +519,27 @@ const styles = StyleSheet.create({
     placeholderEmoji: { fontSize: 30, marginBottom: 5 },
     placeholderText: { color: '#888', fontSize: 14 },
     previewImage: { width: '100%', height: '100%' },
+    subForm: {
+        backgroundColor: '#F9F9FF',
+        padding: 15,
+        borderRadius: 12,
+        marginBottom: 15,
+        borderWidth: 1,
+        borderColor: '#E0E0FF'
+    },
+    subLabel: { fontSize: 12, fontWeight: '600', color: '#666', marginBottom: 5 },
+    daysRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 15 },
+    dayButton: {
+        width: 35,
+        height: 35,
+        borderRadius: 17.5,
+        backgroundColor: '#fff',
+        borderWidth: 1,
+        borderColor: '#DDD',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    dayButtonActive: { backgroundColor: '#6C63FF', borderColor: '#6C63FF' },
+    dayButtonText: { fontSize: 12, fontWeight: '700', color: '#444' },
+    dayButtonTextActive: { color: '#fff' },
 });

@@ -18,6 +18,7 @@ export default function RentSelectedSpot({ route, navigation }: any) {
 
     const basePrice = parseFloat(spot.price || 0);
     const totalPrice = (basePrice * selectedHours).toFixed(2);
+    const deposit = (basePrice * selectedHours * 0.7).toFixed(2);
     const timeOptions = Array.from({ length: 12 }, (_, i) => i + 1);
 
     const handleRentConfirm = async () => {
@@ -45,7 +46,8 @@ export default function RentSelectedSpot({ route, navigation }: any) {
                 body: JSON.stringify({
                     spotId: spot.id,
                     hours: selectedHours,
-                    totalPrice: totalPrice
+                    totalPrice: totalPrice,
+                    deposit: deposit
                 })
             });
 

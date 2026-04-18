@@ -17,7 +17,7 @@ app.use('/api', authRoutes);
 app.use('/api/parking', parkingRoutes);
 app.use('/api/pricing', pricingRoutes);
 
-startCronJobs();
+// startCronJobs();
 
 const PORT = 3000;
 app.listen(PORT, '0.0.0.0', () => {

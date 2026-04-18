@@ -17,7 +17,7 @@ import { URL } from '../config';
 import PriceMarker from '../components/PriceMarker';
 
 export default function RentScreen({ navigation }: any) {
-    // UI State (Yours)
+    // UI State
     const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
     const [selectedSpot, setSelectedSpot] = useState<any | null>(null);
     const [mapRegion, setMapRegion] = useState({
@@ -88,7 +88,7 @@ export default function RentScreen({ navigation }: any) {
                 <GooglePlacesAutocomplete
                     placeholder="Where do you want to park?"
                     fetchDetails={true}
-                    onPress={(data, details = null) => {
+                    onPress={(data: any, details: any = null) => {
                         if (details) {
                             setMapRegion({
                                 latitude: details.geometry.location.lat,

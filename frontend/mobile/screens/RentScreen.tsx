@@ -159,7 +159,7 @@ export default function RentScreen({ navigation }: any) {
             )}
 
             <TouchableOpacity
-                style={[styles.toggleButton, selectedSpot && viewMode === 'map' ? { bottom: 225 } : {}]}
+                style={[styles.toggleButton, selectedSpot && viewMode === 'map' ? { bottom: 250 } : {}]}
                 onPress={() => setViewMode(prev => prev === 'map' ? 'list' : 'map')}
             >
                 <Text style={styles.toggleButtonText}>

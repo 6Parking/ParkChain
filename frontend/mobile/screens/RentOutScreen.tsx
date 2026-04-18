@@ -9,10 +9,13 @@ import {
     ScrollView,
     SafeAreaView,
     KeyboardAvoidingView,
-    Platform
+    Platform,
+    Image,
 } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { URL } from '../config';
+import { SegmentedButtons } from 'react-native-paper';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function RentOutScreen() {
     // State for address components
@@ -20,8 +23,11 @@ export default function RentOutScreen() {
     const [street, setStreet] = useState('');
     const [houseNumber, setHouseNumber] = useState('');
     const [price, setPrice] = useState('');
+    const [size, setSize] = useState('medium');
+    const [evcharger, setEvcharger] = useState('no');
     const [description, setDescription] = useState('');
     const [loading, setLoading] = useState(false);
+    const [image, setImage] = useState<string | null>(null);
 
     const handlePublish = async () => {
         if (!city.trim() || !street.trim() || !houseNumber.trim() || !price.trim()) {
@@ -73,6 +79,19 @@ export default function RentOutScreen() {
             Alert.alert('Connection Error', 'Server is unreachable.');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const pickImage = async () => {
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+        });
+
+        if (!result.canceled) {
+            setImage(result.assets[0].uri);
         }
     };
 
@@ -129,6 +148,31 @@ export default function RentOutScreen() {
                             onChangeText={setPrice}
                         />
 
+                        <Text style={styles.label}>Size</Text>
+                        <SegmentedButtons
+                            style={styles.SegmentedButtons}
+                            value={size}
+                            onValueChange={setSize}
+                            buttons={[
+                                { value: 'small', label: 'Small' },
+                                { value: 'medium', label: 'Medium' },
+                                { value: 'big', label: 'Big' },
+                            ]}
+                            theme={{ colors: { secondaryContainer: '#4c4d4c' } }}
+                        />
+
+                        <Text style={styles.label}>EV charger</Text>
+                        <SegmentedButtons
+                            style={styles.SegmentedButtons}
+                            value={evcharger}
+                            onValueChange={setEvcharger}
+                            buttons={[
+                                { value: 'no', label: 'No' },
+                                { value: 'yes', label: 'Yes' },
+                            ]}
+                            theme={{ colors: { secondaryContainer: '#4c4d4c' } }}
+                        />
+
                         <Text style={styles.label}>Additional Description</Text>
                         <TextInput
                             style={[styles.input, styles.textArea]}
@@ -138,6 +182,15 @@ export default function RentOutScreen() {
                             value={description}
                             onChangeText={setDescription}
                         />
+
+                        <Text style={styles.label}>Photo</Text>
+                        <TouchableOpacity style={styles.imagePlaceholder} onPress={pickImage}>
+                            {image ? (
+                                <Image source={{ uri: image }} style={styles.previewImage} />
+                            ) : (
+                                <Text>Click to add photo</Text>
+                            )}
+                        </TouchableOpacity>
 
                         <TouchableOpacity
                             style={[styles.submitButton, loading && styles.disabledButton]}
@@ -189,5 +242,19 @@ const styles = StyleSheet.create({
         marginTop: 5
     },
     disabledButton: { backgroundColor: '#94d3a2' },
-    submitText: { color: '#fff', fontWeight: 'bold', fontSize: 16 }
+    submitText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+    SegmentedButtons: { marginBottom: 20 },
+    imagePlaceholder: {
+        backgroundColor: '#F3F4F6',
+        height: 150,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 20,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderStyle: 'dashed',
+        overflow: 'hidden'
+    },
+    previewImage: { width: '100%', height: '100%', },
 });

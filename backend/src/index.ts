@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import { startCronJobs } from './routes/services/cron';
 
 import authRoutes from './routes/auth';
 import parkingRoutes from './routes/parking';
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use('/api', authRoutes);
 app.use('/api/parking', parkingRoutes);
 app.use('/api/services', servicesRoutes);
+startCronJobs();
 
 const PORT = 3000;
 app.listen(PORT, '0.0.0.0', () => {

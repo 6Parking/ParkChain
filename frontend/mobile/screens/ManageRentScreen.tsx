@@ -6,6 +6,14 @@ import * as SecureStore from 'expo-secure-store';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { URL } from '../config';
 
+interface Availability {
+    dayOfWeek: number | null;
+    startTime: string | null;
+    endTime: string | null;
+    startDateTime: string | null;
+    endDateTime: string | null;
+}
+
 interface MyRent {
     id: number;
     startTime: string;
@@ -13,9 +21,12 @@ interface MyRent {
     totalPrice: number;
     status: string;
     spot: {
+        id: number;
         address: string;
         city: string;
         size: string;
+        availabilityMode: '24_7' | 'RECURRING' | 'ONCE';
+        availabilities: Availability[];
     };
 }
 
@@ -61,26 +72,38 @@ export default function ManageRentScreen({ navigation }: any) {
         fetchMyRents();
     }, []);
 
-    const handleItemPress = (item: any) => {
+    const handleItemPress = (item: MyRent) => {
+        let maxEndTime: string | null = null;
+        const mode = item.spot.availabilityMode;
+
+        if (mode === 'ONCE' && item.spot.availabilities.length > 0) {
+            maxEndTime = item.spot.availabilities[0].endDateTime;
+        } else if (mode === 'RECURRING') {
+            const endDay = new Date(item.endTime).getDay();
+            const dailyLimit = item.spot.availabilities.find(a => a.dayOfWeek === endDay);
+
+            if (dailyLimit && dailyLimit.endTime) {
+                const limit = new Date(item.endTime);
+                const [h, m] = dailyLimit.endTime.split(':');
+                limit.setHours(parseInt(h), parseInt(m), 0, 0);
+                maxEndTime = limit.toISOString();
+            }
+        }
+
         Alert.alert(
             "Manage Booking",
-            `Spot: ${item.spot.address}\nWhat would you like to do?`,
+            `Spot: ${item.spot.address}`,
             [
-                {
-                    text: "Cancel booking",
-                    onPress: () => confirmCancel(item.id),
-                    style: "destructive",
-                },
+                { text: "Cancel booking", onPress: () => confirmCancel(item.id), style: "destructive" },
                 {
                     text: "Extend",
-                    // onPress: () => navigation.navigate('ExtendBooking', { booking: item }),
+                    onPress: () => navigation.navigate('ExtendBooking', {
+                        booking: item,
+                        maxEndTime: maxEndTime
+                    })
                 },
-                {
-                    text: "Close",
-                    style: "cancel",
-                },
-            ],
-            { cancelable: true }
+                { text: "Close", style: "cancel" },
+            ]
         );
     };
 

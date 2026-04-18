@@ -219,7 +219,11 @@ router.get('/my-rents', async (req: Request, res: Response) => {
                 status: 'PENDING',
             },
             include: {
-                spot: true
+                spot: {
+                    include: {
+                        availabilities: true // <--- To dołącza dane o trybie i godzinach
+                    }
+                }
             },
             orderBy: {
                 startTime: 'desc'

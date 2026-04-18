@@ -15,6 +15,7 @@ import RentSelectedSpot from "./screens/RentSelectedSpot";
 import RentResult from "./screens/RentResult";
 import ManageRentScreen from "./screens/ManageRentScreen";
 import ManageRentOutScreen from "./screens/ManageRentOutScreen";
+import ExtendBookingScreen from "./screens/ExtendBookingScreen";
 
 
 const Stack = createStackNavigator();
@@ -80,6 +81,7 @@ export default function App() {
                             component={ManageRentScreen}
                             options={{ title: 'Manage My Spots' }}
                         />
+                            <Stack.Screen name="ExtendBooking" component={ExtendBookingScreen} options={{ title: 'Extend Booking'}}></Stack.Screen>
 
                         </>
                     )}

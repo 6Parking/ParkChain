@@ -12,6 +12,7 @@ import RentOutScreen from './screens/RentOutScreen';
 import {ActivityIndicator, View} from "react-native";
 import RentSelectedSpot from "./screens/RentSelectedSpot";
 import RentResult from "./screens/RentResult";
+import ManageRentScreen from "./screens/ManageRentScreen";
 import ManageRentOutScreen from "./screens/ManageRentOutScreen";
 
 
@@ -63,15 +64,21 @@ export default function App() {
                     <Stack.Screen name="MainScreen">
                         {(props) => <MainScreen {...props} onLogout={() => setUserToken(null)} />}
                     </Stack.Screen>
-                        <Stack.Screen name="Rent" component={RentScreen} options={{ title: 'Find Parking' }}></Stack.Screen>
-                        <Stack.Screen name="RentSelectedSpot" component={RentSelectedSpot} options={{ title: 'Rent Details' }}></Stack.Screen>
-                        <Stack.Screen name="RentResult" component={RentResult} options={{ title: 'Rent Result' }}></Stack.Screen>
+                    <Stack.Screen name="Rent" component={RentScreen} options={{ title: 'Find Parking' }}></Stack.Screen>
+                    <Stack.Screen name="RentSelectedSpot" component={RentSelectedSpot} options={{ title: 'Rent Details' }}></Stack.Screen>
+                    <Stack.Screen name="RentResult" component={RentResult} options={{ title: 'Rent Result' }}></Stack.Screen>
                     <Stack.Screen name="RentOut" component={RentOutScreen} options={{ title: 'My Spots' }}></Stack.Screen>
-                        <Stack.Screen
-                            name="ManageRentOut"
-                            component={ManageRentOutScreen}
-                            options={{ title: 'Manage My Spots' }}
-                        />
+                    <Stack.Screen
+                        name="ManageRentOut"
+                        component={ManageRentOutScreen}
+                        options={{ title: 'Manage My Spots' }}
+                    />
+                    <Stack.Screen
+                        name="ManageRent"
+                        component={ManageRentScreen}
+                        options={{ title: 'Manage My Spots' }}
+                    />
+
                     </>
                 )}
 

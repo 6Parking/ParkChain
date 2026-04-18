@@ -1,5 +1,14 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
+import {
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    SafeAreaView,
+    Platform,
+    ScrollView,
+    KeyboardAvoidingView
+} from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 
 export default function HomeScreen({ navigation, onLogout }: any) {
@@ -11,50 +20,64 @@ export default function HomeScreen({ navigation, onLogout }: any) {
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.title}>ParkChain</Text>
-                <TouchableOpacity onPress={handleLogout}>
-                    <Text style={styles.logoutText}>Logout</Text>
-                </TouchableOpacity>
-            </View>
+            <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+                <ScrollView>
+                    <View style={styles.header}>
+                        <Text style={styles.title}>ParkChain</Text>
+                        <TouchableOpacity onPress={handleLogout}>
+                            <Text style={styles.logoutText}>Logout</Text>
+                        </TouchableOpacity>
+                    </View>
 
-            <View style={styles.content}>
-                <Text style={styles.welcome}>Welcome! What would you like to do today?</Text>
+                    <View style={styles.content}>
+                        <Text style={styles.welcome}>Welcome! What would you like to do today?</Text>
 
-                <View style={styles.menuContainer}>
-                    <TouchableOpacity
-                        style={[styles.card, styles.rentCard]}
-                        onPress={() => navigation.navigate('Rent')}
-                        activeOpacity={0.7}
-                    >
-                        <Text style={styles.cardEmoji}>🔍</Text>
-                        <Text style={styles.cardTitle}>Rent a Spot</Text>
-                        <Text style={styles.cardSubtitle}>Find and book parking in seconds</Text>
-                    </TouchableOpacity>
+                        <View style={styles.menuContainer}>
+                            <TouchableOpacity
+                                style={[styles.card, styles.rentCard]}
+                                onPress={() => navigation.navigate('Rent')}
+                                activeOpacity={0.7}
+                            >
+                                <Text style={styles.cardEmoji}>🔍</Text>
+                                <Text style={styles.cardTitle}>Rent a Spot</Text>
+                                <Text style={styles.cardSubtitle}>Find and book parking in seconds</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={[styles.card, styles.manageRentsCard]}
+                                onPress={() => navigation.navigate('ManageRent')}
+                                activeOpacity={0.7}
+                            >
+                                <Text style={styles.cardEmoji}>📋</Text>
+                                <Text style={styles.cardTitle}>My Rents</Text>
+                                <Text style={styles.cardSubtitle}>Manage your rents</Text>
+                            </TouchableOpacity>
 
 
 
-                    <TouchableOpacity
-                        style={[styles.card, styles.rentOutCard]}
-                        onPress={() => navigation.navigate('RentOut')}
-                        activeOpacity={0.7}
-                    >
-                        <Text style={styles.cardEmoji}>💰</Text>
-                        <Text style={styles.cardTitle}>Rent Out</Text>
-                        <Text style={styles.cardSubtitle}>List your spot and start earning</Text>
-                    </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.card, styles.rentOutCard]}
+                                onPress={() => navigation.navigate('RentOut')}
+                                activeOpacity={0.7}
+                            >
+                                <Text style={styles.cardEmoji}>💰</Text>
+                                <Text style={styles.cardTitle}>Rent Out</Text>
+                                <Text style={styles.cardSubtitle}>List your spot and start earning</Text>
+                            </TouchableOpacity>
 
-                    <TouchableOpacity
-                        style={[styles.card, styles.manageCard]}
-                        onPress={() => navigation.navigate('ManageRentOut')}
-                        activeOpacity={0.7}
-                    >
-                        <Text style={styles.cardEmoji}>📋</Text>
-                        <Text style={styles.cardTitle}>My Listings</Text>
-                        <Text style={styles.cardSubtitle}>Manage and edit your parking spots</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
+                            <TouchableOpacity
+                                style={[styles.card, styles.manageRentsOutCard]}
+                                onPress={() => navigation.navigate('ManageRentOut')}
+                                activeOpacity={0.7}
+                            >
+                                <Text style={styles.cardEmoji}>📋</Text>
+                                <Text style={styles.cardTitle}>My Listings</Text>
+                                <Text style={styles.cardSubtitle}>Manage and edit your parking spots</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
         </SafeAreaView>
     );
 }
@@ -109,7 +132,7 @@ const styles = StyleSheet.create({
     },
     rentOutCard: {
         borderLeftWidth: 6,
-        borderLeftColor: '#28A745',
+        borderLeftColor: '#a72892',
     },
     cardEmoji: {
         fontSize: 32,
@@ -120,9 +143,14 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         color: '#1A1A1A',
     },
-    manageCard: {
+    manageRentsCard: {
+        borderLeftWidth: 6,
+        borderLeftColor: '#3ebd8f',
+    },
+    manageRentsOutCard: {
         borderLeftWidth: 6,
         borderLeftColor: '#FF9500',
+        marginBottom: 30,
     },
     cardSubtitle: {
         fontSize: 14,

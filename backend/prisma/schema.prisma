@@ -33,9 +33,24 @@ model ParkingSpot {
   isActive    Boolean   @default(true)
   size        String    @default("medium")
   imageUrl    String?
+  availabilityMode String    @default("24_7")
   owner       User      @relation("UserSpots", fields: [ownerId], references: [id])
+  availabilities Availability[]
   bookings    Booking[]
   surgeLogs   SurgePricingLog[]
+}
+
+model Availability {
+  id          Int         @id @default(autoincrement())
+  spotId      Int
+
+  // 0 - Sunday
+  dayOfWeek   Int?
+  startDateTime   DateTime?
+  endDateTime     DateTime?
+  startTime   String?
+  endTime     String?
+  spot        ParkingSpot @relation(fields: [spotId], references: [id])
 }
 
 model Booking {

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { SafeAreaView, StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { Picker } from '@react-native-picker/picker'; // Nowy import
 
-export default function RentSelectedSpot({ route }: any) {
+export default function RentSelectedSpot({ route, navigation }: any) {
     // 1. Odbieranie danych miejsca
     const spot = route?.params?.spot || {
         address: 'Brak danych',
@@ -65,7 +65,7 @@ export default function RentSelectedSpot({ route }: any) {
                 </View>
 
                 {/* PRZYCISK GŁÓWNY - Cena aktualizuje się na żywo! */}
-                <TouchableOpacity style={styles.rentButton}>
+                <TouchableOpacity style={styles.rentButton} onPress={() => navigation.navigate('RentResult', {spot: spot, totalPrice: totalPrice})}>
                     <Text style={styles.rentButtonText}>Rent for {totalPrice} zł</Text>
                 </TouchableOpacity>
 

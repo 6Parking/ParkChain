@@ -41,6 +41,15 @@ export default function HomeScreen({ navigation, onLogout }: any) {
                         <Text style={styles.cardTitle}>Rent Out</Text>
                         <Text style={styles.cardSubtitle}>List your spot and start earning</Text>
                     </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.card, styles.manageCard]}
+                        onPress={() => navigation.navigate('ManageSpots')}
+                        activeOpacity={0.7}
+                    >
+                        <Text style={styles.cardEmoji}>📋</Text>
+                        <Text style={styles.cardTitle}>My Listings</Text>
+                        <Text style={styles.cardSubtitle}>Manage and edit your parking spots</Text>
+                    </TouchableOpacity>
                 </View>
             </View>
         </SafeAreaView>
@@ -107,6 +116,10 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: '700',
         color: '#1A1A1A',
+    },
+    manageCard: {
+        borderLeftWidth: 6,
+        borderLeftColor: '#FF9500',
     },
     cardSubtitle: {
         fontSize: 14,

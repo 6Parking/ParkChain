@@ -76,4 +76,23 @@ router.get('/', async (req: Request, res: Response) => {
     }
 });
 
+router.get('/my-spots', async (req: Request, res: Response) => {
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader) return res.status(401).json({ error: 'No token provided' });
+
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
+
+        const mySpots = await prisma.parkingSpot.findMany({
+            where: {
+                ownerId: decoded.userId
+            }
+        });
+
+        res.json(mySpots);
+    } catch (error) {
+        res.status(401).json({ error: 'Invalid token' });
+    }
+});
 export default router;

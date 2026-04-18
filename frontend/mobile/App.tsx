@@ -63,12 +63,12 @@ export default function App() {
                         </>
                     ) : (
                         <>
-                        <Stack.Screen name="MainScreen">
+                    <Stack.Screen name="MainScreen" options={{ headerShown: false }}>
                             {(props) => <MainScreen {...props} onLogout={() => setUserToken(null)} />}
                         </Stack.Screen>
-                        <Stack.Screen name="Rent" component={RentScreen} options={{ title: 'Find Parking' }}></Stack.Screen>
+                        <Stack.Screen name="Rent" component={RentScreen} options={{ title: 'Find Parking', headerShown: false }}></Stack.Screen>
                         <Stack.Screen name="RentSelectedSpot" component={RentSelectedSpot} options={{ title: 'Rent Details' }}></Stack.Screen>
-                        <Stack.Screen name="RentResult" component={RentResult} options={{ title: 'Rent Result' }}></Stack.Screen>
+                        <Stack.Screen name="RentResult" component={RentResult} options={{ title: 'Rent Result', headerShown: false }}></Stack.Screen>
                         <Stack.Screen name="RentOut" component={RentOutScreen} options={{ title: 'My Spots' }}></Stack.Screen>
                         <Stack.Screen
                             name="ManageRentOut"

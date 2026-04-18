@@ -4,13 +4,15 @@ import {
     Text,
     View,
     TouchableOpacity,
-    StatusBar, Platform
+    StatusBar,
+    Platform
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function RentResult({route, navigation}: any) {
     const spot = route?.params?.spot || {address: 'Unknown location'}
     const totalPrice = route?.params?.totalPrice || '0';
+    
     const handleReturnToMain = () => {
         navigation.reset({
             index: 0, 

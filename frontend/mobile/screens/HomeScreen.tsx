@@ -32,6 +32,8 @@ export default function HomeScreen({ navigation, onLogout }: any) {
                         <Text style={styles.cardSubtitle}>Find and book parking in seconds</Text>
                     </TouchableOpacity>
 
+
+
                     <TouchableOpacity
                         style={[styles.card, styles.rentOutCard]}
                         onPress={() => navigation.navigate('RentOut')}
@@ -41,9 +43,10 @@ export default function HomeScreen({ navigation, onLogout }: any) {
                         <Text style={styles.cardTitle}>Rent Out</Text>
                         <Text style={styles.cardSubtitle}>List your spot and start earning</Text>
                     </TouchableOpacity>
+
                     <TouchableOpacity
                         style={[styles.card, styles.manageCard]}
-                        onPress={() => navigation.navigate('ManageSpots')}
+                        onPress={() => navigation.navigate('ManageRentOut')}
                         activeOpacity={0.7}
                     >
                         <Text style={styles.cardEmoji}>📋</Text>

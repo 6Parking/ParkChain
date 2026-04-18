@@ -14,7 +14,7 @@ interface ParkingSpot {
     isActive: boolean;
 }
 
-export default function ManageSpotsScreen({ navigation }: any) {
+export default function ManageRentOutScreen({ navigation }: any) {
     const [mySpots, setMySpots] = useState<ParkingSpot[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);

@@ -12,7 +12,7 @@ import RentOutScreen from './screens/RentOutScreen';
 import {ActivityIndicator, View} from "react-native";
 import RentSelectedSpot from "./screens/RentSelectedSpot";
 import RentResult from "./screens/RentResult";
-import ManageSpotsScreen from "./screens/ManageSpotsScreen";
+import ManageRentOutScreen from "./screens/ManageRentOutScreen";
 
 
 const Stack = createStackNavigator();
@@ -68,8 +68,8 @@ export default function App() {
                         <Stack.Screen name="RentResult" component={RentResult} options={{ title: 'Rent Result' }}></Stack.Screen>
                     <Stack.Screen name="RentOut" component={RentOutScreen} options={{ title: 'My Spots' }}></Stack.Screen>
                         <Stack.Screen
-                            name="ManageSpots"
-                            component={ManageSpotsScreen}
+                            name="ManageRentOut"
+                            component={ManageRentOutScreen}
                             options={{ title: 'Manage My Spots' }}
                         />
                     </>

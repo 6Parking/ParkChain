@@ -9,14 +9,28 @@ import {
     ActivityIndicator,
     RefreshControl
 } from 'react-native';
-import { URL } from '../config'; // Upewnij się, że ścieżka jest poprawna
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import * as Location from 'expo-location';
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import { URL } from '../config'; // Imported from teammate's code
 
 export default function RentScreen() {
-    const [spots, setSpots] = useState([]);
+    // UI State (Yours)
+    const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
+    const [selectedSpot, setSelectedSpot] = useState<any | null>(null);
+    const [mapRegion, setMapRegion] = useState({
+        latitude: 52.231,
+        longitude: 21.001,
+        latitudeDelta: 0.05,
+        longitudeDelta: 0.05,
+    });
+
+    // Data State (Teammate's)
+    const [spots, setSpots] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
 
-    // Funkcja pobierająca dane z API
+    // Fetch data from real backend
     const fetchSpots = async () => {
         try {
             const response = await fetch(`${URL}/parking`);
@@ -25,22 +39,35 @@ export default function RentScreen() {
             if (response.ok) {
                 setSpots(data);
             } else {
-                console.error("Błąd serwera:", data.error);
+                console.error("Server Error:", data.error);
             }
         } catch (error) {
-            console.error("Błąd połączenia:", error);
+            console.error("Connection Error:", error);
         } finally {
             setLoading(false);
             setRefreshing(false);
         }
     };
 
-    // Pobierz dane przy pierwszym uruchomieniu
+    // Initialize location and fetch spots on mount
     useEffect(() => {
-        fetchSpots();
+        (async () => {
+            let { status } = await Location.requestForegroundPermissionsAsync();
+            if (status === 'granted') {
+                let currentLocation = await Location.getCurrentPositionAsync({});
+                setMapRegion({
+                    latitude: currentLocation.coords.latitude,
+                    longitude: currentLocation.coords.longitude,
+                    latitudeDelta: 0.05,
+                    longitudeDelta: 0.05,
+                });
+            }
+        })();
+
+        fetchSpots(); // Call teammate's fetch function
     }, []);
 
-    // Funkcja do odświeżania (pull-to-refresh)
+    // Pull-to-refresh logic
     const onRefresh = () => {
         setRefreshing(true);
         fetchSpots();
@@ -55,38 +82,122 @@ export default function RentScreen() {
         );
     }
 
+    // Teammate's updated List View rendering function
+    const renderList = () => (
+        <FlatList
+            data={spots}
+            keyExtractor={(item) => item.id.toString()}
+            contentContainerStyle={{ padding: 20, paddingTop: 80 }}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+            ListEmptyComponent={
+                <Text style={styles.emptyText}>No parking spots available right now.</Text>
+            }
+            renderItem={({ item }) => (
+                <TouchableOpacity style={styles.spotCard} activeOpacity={0.7} onPress={() => setSelectedSpot(item)}>
+                    <View style={{ flex: 1 }}>
+                        <Text style={styles.address}>{item.address}</Text>
+                        <Text style={styles.city}>{item.city}</Text>
+                        {item.description ? (
+                            <Text style={styles.description} numberOfLines={1}>{item.description}</Text>
+                        ) : null}
+                    </View>
+                    <View style={styles.priceTag}>
+                        {/* Updated to teammate's database schema: hourlyRate */}
+                        <Text style={styles.price}>${item.hourlyRate}</Text>
+                        <Text style={styles.perHour}>/h</Text>
+                    </View>
+                </TouchableOpacity>
+            )}
+        />
+    );
+
     return (
         <SafeAreaView style={styles.container}>
-            <Text style={styles.headerTitle}>Available Spots</Text>
+            {/* Google Places Search Bar */}
+            <View style={styles.searchContainer}>
+                <GooglePlacesAutocomplete
+                    placeholder="Where do you want to park?"
+                    fetchDetails={true}
+                    onPress={(data: any, details: any = null) => {
+                        if (details) {
+                            setMapRegion({
+                                latitude: details.geometry.location.lat,
+                                longitude: details.geometry.location.lng,
+                                latitudeDelta: 0.02,
+                                longitudeDelta: 0.02,
+                            });
+                            setViewMode('map');
+                        }
+                    }}
+                    query={{
+                        key: 'YOUR_GOOGLE_CLOUD_API_KEY_HERE', // <--- REPLACE THIS!
+                        language: 'en',
+                    }}
+                    styles={{
+                        textInput: styles.searchInput,
+                        container: { flex: 0 },
+                        listView: { backgroundColor: 'white', borderRadius: 10, elevation: 5 }
+                    }}
+                />
+            </View>
 
-            <FlatList
-                data={spots}
-                keyExtractor={(item) => item.id.toString()}
-                contentContainerStyle={{ padding: 20 }}
-                refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-                }
-                ListEmptyComponent={
-                    <Text style={styles.emptyText}>No parking spots available right now.</Text>
-                }
-                renderItem={({ item }) => (
-                    <TouchableOpacity style={styles.spotCard} activeOpacity={0.7}>
-                        <View style={{ flex: 1 }}>
-                            <Text style={styles.address}>{item.address}</Text>
-                            <Text style={styles.city}>{item.city}</Text>
-                            {item.description ? (
-                                <Text style={styles.description} numberOfLines={1}>
-                                    {item.description}
-                                </Text>
-                            ) : null}
-                        </View>
-                        <View style={styles.priceTag}>
-                            <Text style={styles.price}>${item.hourlyRate}</Text>
-                            <Text style={styles.perHour}>/h</Text>
-                        </View>
+            {/* Render Map or List */}
+            {viewMode === 'map' ? (
+                <View style={styles.mapContainer}>
+                    <MapView
+                        style={styles.map}
+                        provider={PROVIDER_GOOGLE}
+                        showsUserLocation={true}
+                        region={mapRegion}
+                        onPress={() => setSelectedSpot(null)}
+                    >
+                        {spots.map((spot) => (
+                            // IMPORTANT: Backend must provide spot.latitude and spot.longitude!
+                            <Marker
+                                key={spot.id}
+                                coordinate={{
+                                    latitude: spot.latitude || 52.231, // Fallback to prevent crash if backend is missing data
+                                    longitude: spot.longitude || 21.001
+                                }}
+                                onPress={(e: any) => {
+                                    e.stopPropagation();
+                                    setSelectedSpot(spot);
+                                }}
+                            >
+                                <View style={styles.markerContainer}>
+                                    <Text style={styles.markerText}>${spot.hourlyRate}</Text>
+                                </View>
+                            </Marker>
+                        ))}
+                    </MapView>
+                </View>
+            ) : (
+                renderList()
+            )}
+
+            {/* Selected Spot Bottom Sheet */}
+            {selectedSpot && viewMode === 'map' && (
+                <View style={styles.bottomSheet}>
+                    <View style={styles.bottomSheetHeader}>
+                        <Text style={styles.sheetAddress}>{selectedSpot.address}</Text>
+                        <Text style={styles.sheetPrice}>${selectedSpot.hourlyRate}/h</Text>
+                    </View>
+                    <Text style={styles.sheetCity}>{selectedSpot.city}</Text>
+                    <TouchableOpacity style={styles.bookButton} onPress={() => alert('Booking logic comes here!')}>
+                        <Text style={styles.bookButtonText}>Book This Spot</Text>
                     </TouchableOpacity>
-                )}
-            />
+                </View>
+            )}
+
+            {/* Toggle Button */}
+            <TouchableOpacity
+                style={styles.toggleButton}
+                onPress={() => setViewMode(prev => prev === 'map' ? 'list' : 'map')}
+            >
+                <Text style={styles.toggleButtonText}>
+                    {viewMode === 'map' ? '📄 Show List' : '🗺️ Show Map'}
+                </Text>
+            </TouchableOpacity>
         </SafeAreaView>
     );
 }
@@ -94,7 +205,38 @@ export default function RentScreen() {
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#F8F9FA' },
     center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    headerTitle: { fontSize: 24, fontWeight: '800', padding: 20, color: '#1A1A1A' },
+    searchContainer: {
+        position: 'absolute',
+        top: 50,
+        width: '100%',
+        paddingHorizontal: 20,
+        zIndex: 10,
+    },
+    searchInput: {
+        height: 50,
+        borderRadius: 25,
+        paddingHorizontal: 20,
+        fontSize: 16,
+        backgroundColor: '#fff',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    mapContainer: { flex: 1 },
+    map: { ...StyleSheet.absoluteFillObject },
+    markerContainer: {
+        backgroundColor: '#28A745',
+        paddingVertical: 5,
+        paddingHorizontal: 10,
+        borderRadius: 15,
+        borderWidth: 2,
+        borderColor: '#fff',
+    },
+    markerText: { color: '#fff', fontWeight: 'bold' },
+
+    // Combined List Styles
     spotCard: {
         backgroundColor: '#fff',
         padding: 20,
@@ -115,5 +257,43 @@ const styles = StyleSheet.create({
     priceTag: { alignItems: 'flex-end', marginLeft: 10 },
     price: { fontSize: 18, fontWeight: '800', color: '#28A745' },
     perHour: { fontSize: 12, color: '#666' },
-    emptyText: { textAlign: 'center', color: '#999', marginTop: 50, fontSize: 16 }
+    emptyText: { textAlign: 'center', color: '#999', marginTop: 50, fontSize: 16 },
+
+    // Bottom Sheet Styles
+    bottomSheet: {
+        position: 'absolute',
+        bottom: 30,
+        left: 20,
+        right: 20,
+        backgroundColor: '#fff',
+        borderRadius: 20,
+        padding: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
+        elevation: 10,
+    },
+    bottomSheetHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    sheetAddress: { fontSize: 18, fontWeight: '800', color: '#1A1A1A', flex: 1 },
+    sheetPrice: { fontSize: 22, fontWeight: '800', color: '#28A745' },
+    sheetCity: { color: '#007AFF', marginTop: 5, marginBottom: 15, fontWeight: '600' },
+    bookButton: { backgroundColor: '#007AFF', padding: 15, borderRadius: 12, alignItems: 'center' },
+    bookButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+
+    toggleButton: {
+        position: 'absolute',
+        bottom: 40,
+        alignSelf: 'center',
+        backgroundColor: '#1A1A1A',
+        paddingVertical: 12,
+        paddingHorizontal: 25,
+        borderRadius: 25,
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+    },
+    toggleButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 14 },
 });

@@ -12,6 +12,68 @@ ParkChain is a decentralized peer-to-peer parking marketplace. It empowers drive
 ## How we built it
 We developed a mobile-first experience using **React Native**, focusing on Android deployment. Our robust backend is powered by **TypeScript**. To make the platform even smarter, we implemented an intelligent pricing engine that suggests optimal hourly rates based on real-time factors like geolocation, time of day, and even nearby local events!
 
+## How to run it 
+To run ParkChain locally, you will need to set up both the backend server and the frontend mobile application. 
+
+Prerequisites: 
+- Node.js installed 
+- npm or yarn 
+- Expo Go app installed on your physical Android device, or Android Studio installed and configured with an Android Emulator. 
+
+1. Clone the repository
+<pre>
+git clone https://github.com/6Parking/ParkChain.git
+cd ParkChain
+</pre>
+
+2. Backend setup  
+
+Open a terminal, navigate to the backend directory, and install the required dependencies: 
+<pre>
+cd backend
+npm install 
+</pre>  
+Create a .env file in the root of backend folder and populate it with your database and API keys:  
+<pre>
+DATABASE_URL="your_database_url_here"
+GEMINI_API_KEY="your_gemini_api_key_here"
+</pre>
+
+Initialize Prisma (generate client and push schema to your database): 
+<pre>
+npx prisma generate 
+npx prisma db push 
+</pre>
+
+Start the backend development server: 
+<pre>
+npm run dev
+</pre>
+
+3. Frontend setup 
+
+Open a new terminal window (leave the backend running), navigate to the frontend directory, and install  its dependencies: 
+<pre>
+cd frontend 
+npm install
+</pre>
+
+Create a .env file in the root of the frontend folder and add the backend API URL: 
+<pre>
+EXPO_PUBLIC_API_URL=http://127.0.0.1:3000/api
+</pre>
+
+(Note: If you are running the backend locally on a different IP, update the address above to match your local machine's IPv4 address). 
+
+Start the Expo development server: 
+<pre>
+npx expo start 
+</pre>
+
+4. Launching the App 
+
+Once the Expo server is running, you will see a QR code in your terminal. Physical Device: Open the Expo Go app on your Android phone and scan the QR code. Emulator: Press 'a' in the terminal to automatically launch the app in your running Android Emulator. 
+
 ## Challenges we ran into
 We initially struggled with a chaotic Git environment, losing precious time resolving merge conflicts. Beyond the code, we had to brainstorm complex real-world edge cases—specifically the legal and operational challenges of reservation breaches, such as what happens when a driver overstays their booked timeframe.
 

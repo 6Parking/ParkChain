@@ -137,7 +137,7 @@ export default function RentScreen({ navigation }: any) {
                                 <Text style={styles.city}>{item.city}</Text>
                             </View>
                             <View style={styles.priceTag}>
-                                <Text style={styles.price}>{item.hourlyRate} PLN</Text>
+                                <Text style={styles.price}>{item.hourlyRate} zł</Text>
                                 <Text style={styles.perHour}>/h</Text>
                             </View>
                         </TouchableOpacity>
@@ -149,7 +149,7 @@ export default function RentScreen({ navigation }: any) {
             {selectedSpot && viewMode === 'map' && (
                 <View style={styles.bottomSheet}>
                     <Text style={styles.sheetAddress}>{selectedSpot.address}</Text>
-                    <Text style={styles.sheetPrice}>{selectedSpot.hourlyRate} PLN/h</Text>
+                    <Text style={styles.sheetPrice}>{selectedSpot.hourlyRate} zł/h</Text>
                     <TouchableOpacity style={styles.bookButton} onPress={() => handleBookSpot(selectedSpot)}>
                         <Text style={styles.bookButtonText}>Book This Spot</Text>
                     </TouchableOpacity>

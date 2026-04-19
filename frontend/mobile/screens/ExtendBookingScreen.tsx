@@ -109,7 +109,7 @@ export default function ExtendBookingScreen({ route, navigation }: any) {
                     </View>
                     <View style={styles.summaryRow}>
                         <Text style={styles.summaryLabel}>Additional Cost:</Text>
-                        <Text style={styles.priceValue}>{additionalCost.toFixed(2)} PLN</Text>
+                        <Text style={styles.priceValue}>{additionalCost.toFixed(2)} zł</Text>
                     </View>
                 </View>
 

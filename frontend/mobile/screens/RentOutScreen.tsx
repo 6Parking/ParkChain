@@ -366,7 +366,7 @@ export default function RentOutScreen({ route, navigation }: any) {
                             </View>
                         </View>
 
-                        <Text style={styles.label}>Price per hour (PLN)</Text>
+                        <Text style={styles.label}>Price per hour (zł)</Text>
                         <View style={styles.priceRowContainer}>
                             <TextInput
                                 style={[styles.input, { flex: 1, marginBottom: 0 }]}

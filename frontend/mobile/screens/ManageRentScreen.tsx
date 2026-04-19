@@ -133,7 +133,7 @@ export default function ManageRentScreen({ navigation }: any) {
       const data = await response.json();
 
       if (response.ok) {
-        Alert.alert("Check Out Successful", `${data.message}\nFinal Price: $${data.finalPrice.toFixed(2)}`);
+        Alert.alert("Check Out Successful", `${data.message}\nFinal Price: ${data.finalPrice.toFixed(2)} zł`);
         fetchMyRents();
       } else {
         Alert.alert("Error", data.error || "Failed to check out.");
@@ -230,7 +230,7 @@ export default function ManageRentScreen({ navigation }: any) {
                 <Text style={styles.smallText}>From: {formatPL(item.startTime)}</Text>
                 <Text style={styles.smallText}>Until: {formatPL(item.endTime)}</Text>
               </View>
-              <Text style={styles.price}>${item.totalPrice}</Text>
+              <Text style={styles.price}>{item.totalPrice} zł</Text>
             </View>
           </TouchableOpacity>
         )}

@@ -38,7 +38,7 @@ export default function PriceMarker({ price, coordinate, onPress }: any) {
                     style={styles.container}
                 >
                     <View style={styles.bubble}>
-                        <Text style={styles.text}>{price} PLN</Text>
+                        <Text style={styles.text}>{price} zł</Text>
                     </View>
                 </ViewShot>
             </Marker>

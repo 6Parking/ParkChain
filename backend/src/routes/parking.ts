@@ -10,61 +10,61 @@ if (!JWT_SECRET) {
 }
 
 router.post("/", async (req: Request, res: Response) => {
-  try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader) return res.status(401).json({ error: "No token" });
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader) return res.status(401).json({ error: "No token" });
 
-    const token = authHeader.split(" ")[1];
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
+        const token = authHeader.split(" ")[1];
+        const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
 
-    const { city, street, houseNumber, hourlyRate, description, size, hasCharger, latitude, longitude, availabilityMode, availabilityData } =
-      req.body;
+        const { city, street, houseNumber, hourlyRate, description, size, hasCharger, hasRoof, latitude, longitude, availabilityMode, availabilityData } = req.body;
 
-    const newSpot = await prisma.$transaction(async (tx) => {
-      const spot = await tx.parkingSpot.create({
-        data: {
-          ownerId: decoded.userId,
-          address: `${street} ${houseNumber}, ${city}`,
-          city,
-          street,
-          houseNumber,
-          latitude,
-          longitude,
-          hourlyRate,
-          description,
-          size,
-          hasCharger,
-          availabilityMode,
-        },
-      });
+        const newSpot = await prisma.$transaction(async (tx) => {
+            const spot = await tx.parkingSpot.create({
+                data: {
+                    ownerId: decoded.userId,
+                    address: `${street} ${houseNumber}, ${city}`,
+                    city,
+                    street,
+                    houseNumber,
+                    latitude,
+                    longitude,
+                    hourlyRate,
+                    description,
+                    size,
+                    hasCharger,
+                    hasRoof,
+                    availabilityMode,
+                },
+            });
 
-      if (availabilityMode === "RECURRING" && availabilityData.days) {
-        await tx.availability.createMany({
-          data: availabilityData.days.map((day: number) => ({
-            spotId: spot.id,
-            dayOfWeek: day,
-            startTime: availabilityData.start,
-            endTime: availabilityData.end,
-          })),
+          if (availabilityMode === "RECURRING" && availabilityData.days) {
+            await tx.availability.createMany({
+              data: availabilityData.days.map((day: number) => ({
+                spotId: spot.id,
+                dayOfWeek: day,
+                startTime: availabilityData.start,
+                endTime: availabilityData.end,
+              })),
+            });
+          } else if (availabilityMode === "ONCE" && availabilityData.start) {
+            await tx.availability.create({
+              data: {
+                spotId: spot.id,
+                startDateTime: new Date(availabilityData.start),
+                endDateTime: new Date(availabilityData.end),
+              },
+            });
+          }
+
+          return spot;
         });
-      } else if (availabilityMode === "ONCE" && availabilityData.start) {
-        await tx.availability.create({
-          data: {
-            spotId: spot.id,
-            startDateTime: new Date(availabilityData.start),
-            endDateTime: new Date(availabilityData.end),
-          },
-        });
-      }
 
-      return spot;
-    });
-
-    res.status(201).json(newSpot);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to create spot" });
-  }
+        res.status(201).json(newSpot);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to create spot" });
+    }
 });
 
 router.put("/:id", async (req: Request, res: Response) => {

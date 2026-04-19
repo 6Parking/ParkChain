@@ -90,10 +90,17 @@ export default function ManageRentScreen({ navigation }: any) {
     }
 
     Alert.alert("Manage Booking", `Spot: ${item.spot.address}`, [
-      { text: "Cancel booking", onPress: () => confirmCancel(item.id), style: "destructive" },
-      { text: "Check out", onPress: () => handleCheckOut(item) },
-      { text: "Close", style: "cancel" },
-    ]);
+        { text: "Cancel booking", onPress: () => confirmCancel(item.id), style: "destructive" },
+        { text: "Check out", onPress: () => handleCheckOut(item) },
+        {
+            text: "Extend",
+            onPress: () => navigation.navigate('ExtendBooking', {
+                booking: item,
+                maxEndTime: maxEndTime
+            })
+        },
+    ],
+    { cancelable: true });
   };
 
   const handleCheckOut = (item: any) => {

@@ -27,7 +27,6 @@ export default function RentOutScreen({ route, navigation }: any) {
     const [image, setImage] = useState<string | null>(null);
     const [availabilityMode, setAvailabilityMode] = useState('24_7');
     const [selectedDays, setSelectedDays] = useState<number[]>([]);
-    const [specificDate, setSpecificDate] = useState('');
 
     const getMidnightDate = () => {
         const d = new Date();

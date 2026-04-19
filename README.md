@@ -3,7 +3,7 @@ Made during ETHSilesia 2026 hackathon
 # ParkChain
 
 ## Inspiration
-Ever found yourself loosing time and patience looking for a parking space? Or maybe you own a spot that sits empty half the day while you're at work? 
+Ever found yourself losing time and patience looking for a parking space? Or maybe you own a spot that sits empty half the day while you're at work? 
 These everyday frustrations inspired us to build ParkChain - a seamless bridge connecting drivers in need of a spot with owners looking to generate passive income.
 
 ## What it does
@@ -37,6 +37,7 @@ Create a .env file in the root of backend folder and populate it with your datab
 <pre>
 DATABASE_URL="your_database_url_here"
 GEMINI_API_KEY="your_gemini_api_key_here"
+JWT_SECRET="UNcVDtd72uZGgZNT4TJt"
 </pre>
 
 Initialize Prisma (generate client and push schema to your database): 
@@ -54,7 +55,7 @@ npm run dev
 
 Open a new terminal window (leave the backend running), navigate to the frontend directory, and install  its dependencies: 
 <pre>
-cd frontend 
+cd frontend\mobile
 npm install
 </pre>
 

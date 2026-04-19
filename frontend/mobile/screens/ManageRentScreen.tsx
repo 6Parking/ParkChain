@@ -91,13 +91,7 @@ export default function ManageRentScreen({ navigation }: any) {
 
     Alert.alert("Manage Booking", `Spot: ${item.spot.address}`, [
       { text: "Cancel booking", onPress: () => confirmCancel(item.id), style: "destructive" },
-      {
-        text: "Extend",
-      },
-      {
-        text: "Check out",
-        onPress: () => handleCheckOut(item), // Nowa funkcja do obsługi Check out
-      },
+      { text: "Check out", onPress: () => handleCheckOut(item) },
       { text: "Close", style: "cancel" },
     ]);
   };

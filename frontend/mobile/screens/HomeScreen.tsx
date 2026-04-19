@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView, Keyboar
 import * as SecureStore from "expo-secure-store";
 import { useFocusEffect } from "@react-navigation/native";
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function HomeScreen({ navigation, onLogout }: any) {
   useFocusEffect(
@@ -57,19 +58,19 @@ export default function HomeScreen({ navigation, onLogout }: any) {
 
             <View style={styles.menuContainer}>
                 <TouchableOpacity style={[styles.card, styles.rentCard]} onPress={() => navigation.navigate("Rent")} activeOpacity={0.7}>
-                    <Text style={styles.cardEmoji}>🔍</Text>
+                    <Ionicons name="search-outline" size={32} color="#007AFF" style={styles.cardIcon} />
                     <Text style={styles.cardTitle}>Rent a Spot</Text>
                     <Text style={styles.cardSubtitle}>Find and book parking in seconds</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={[styles.card, styles.manageRentsCard]} onPress={() => navigation.navigate("ManageRent")} activeOpacity={0.7}>
-                    <Text style={styles.cardEmoji}>📋</Text>
+                    <Ionicons name="receipt-outline" size={32} color="#3ebd8f" style={styles.cardIcon} />
                     <Text style={styles.cardTitle}>My Rents</Text>
                     <Text style={styles.cardSubtitle}>Manage your rents</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={[styles.card, styles.rentOutCard]} onPress={() => navigation.navigate("RentOut")} activeOpacity={0.7}>
-                    <Text style={styles.cardEmoji}>💰</Text>
+                    <Ionicons name="cash-outline" size={32} color="#a72892" style={styles.cardIcon} />
                     <Text style={styles.cardTitle}>Rent Out</Text>
                     <Text style={styles.cardSubtitle}>List your spot and start earning</Text>
                 </TouchableOpacity>
@@ -79,7 +80,7 @@ export default function HomeScreen({ navigation, onLogout }: any) {
                     onPress={() => navigation.navigate("ManageRentOut")}
                     activeOpacity={0.7}
                 >
-                    <Text style={styles.cardEmoji}>📋</Text>
+                    <Ionicons name="albums-outline" size={32} color="#FF9500" style={styles.cardIcon} />
                     <Text style={styles.cardTitle}>My Listings</Text>
                     <Text style={styles.cardSubtitle}>Manage and edit your parking spots</Text>
                 </TouchableOpacity>
@@ -89,7 +90,7 @@ export default function HomeScreen({ navigation, onLogout }: any) {
                     onPress={() => navigation.navigate("About")}
                     activeOpacity={0.7}
                 >
-                    <Text style={styles.cardEmoji}>📋</Text>
+                    <Ionicons name="information-circle-outline" size={32} color="#666" style={styles.cardIcon} />
                     <Text style={styles.cardTitle}>About</Text>
                     <Text style={styles.cardSubtitle}>FAQ</Text>
                 </TouchableOpacity>
@@ -144,6 +145,9 @@ card: {
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
+},
+cardIcon: {
+    marginBottom: 10,
 },
 rentCard: {
     borderLeftWidth: 6,

@@ -169,7 +169,6 @@ export default function RentOutScreen({ route, navigation }: any) {
                     hour: currentHour,
                     weather: 'sunny',
                     isEventNearby: false
-
                 }),
             });
 

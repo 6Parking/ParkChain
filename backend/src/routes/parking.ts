@@ -173,7 +173,7 @@ router.post("/book", async (req: Request, res: Response) => {
     const token = authHeader.split(" ")[1];
     const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
 
-    // 2. Pobranie danych z frontendu
+
     const { spotId, hours, totalPrice, deposit } = req.body;
 
     if (!spotId || !hours || !totalPrice || !deposit) {
@@ -223,7 +223,7 @@ router.get("/my-rents", async (req: Request, res: Response) => {
       include: {
         spot: {
           include: {
-            availabilities: true, // <--- To dołącza dane o trybie i godzinach
+            availabilities: true,
           },
         },
       },
@@ -385,5 +385,78 @@ router.put("/checkout/:id", async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+router.post('/extend-booking', async (req: Request, res: Response) => {
+  try {
+    const { bookingId, newEndTime, additionalCost } = req.body;
+    const newEnd = new Date(newEndTime);
+
+    const booking = await prisma.booking.findUnique({
+      where: { id: bookingId },
+      include: {
+        spot: {
+          include: { availabilities: true, bookings: true }
+        }
+      }
+    });
+
+    if (!booking) return res.status(404).json({ error: 'Booking not found' });
+    const conflict = await prisma.booking.findFirst({
+      where: {
+        spotId: booking.spotId,
+        id: { not: bookingId },
+        status: 'PENDING',
+        OR: [
+          {
+            startTime: { lt: newEnd },
+            endTime: { gt: new Date(booking.endTime) }
+          }
+        ]
+      }
+    });
+
+    if (conflict) {
+      return res.status(400).json({ error: 'This spot is already booked for the extended time.' });
+    }
+
+    const mode = booking.spot.availabilityMode;
+    const avails = booking.spot.availabilities;
+
+    if (mode === 'ONCE') {
+      const limit = avails[0]?.endDateTime;
+      if (limit && newEnd > new Date(limit)) {
+        return res.status(400).json({ error: 'Extension exceeds spot availability limit.' });
+      }
+    } else if (mode === 'RECURRING') {
+      const dayOfWeek = newEnd.getDay();
+      const dailyLimit = avails.find(a => a.dayOfWeek === dayOfWeek);
+
+      if (dailyLimit && dailyLimit.endTime) {
+        const [h, m] = dailyLimit.endTime.split(':');
+        const limitDate = new Date(newEnd);
+        limitDate.setHours(parseInt(h), parseInt(m), 0, 0);
+
+        if (newEnd > limitDate) {
+          return res.status(400).json({ error: 'Spot is closed at the requested time.' });
+        }
+      }
+    }
+
+    const updatedBooking = await prisma.booking.update({
+      where: { id: bookingId },
+      data: {
+        endTime: newEnd,
+        totalPrice: { increment: additionalCost }
+      }
+    });
+
+    res.json({ message: 'Booking extended successfully', updatedBooking });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error during extension.' });
+  }
+});
+
 
 export default router;
